@@ -3,9 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Excel Omniverse: Architectural Edu-Engine</title>
+  <title>Excel Omniverse: Bulletproof Engine</title>
   
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollToPlugin.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/hyperformula/dist/hyperformula.full.min.js"></script>
 
   <style>
@@ -97,14 +98,17 @@
     .page p { line-height: 1.7; color: var(--text-muted); font-size: 1.05rem; font-weight: 500;}
     .syntax-box { background: var(--input-bg); padding: 1.25rem; border-radius: 8px; border: 1px solid var(--glass-border); font-family: monospace; color: var(--accent); line-height: 1.5; box-shadow: inset 0 4px 8px rgba(0,0,0,0.1); margin: 1rem 0; }
 
+    /* =======================================================
+       UX FIX: HIGH-DENSITY MATRIX RENDERING
+       ======================================================= */
     .table-wrapper { background: var(--input-bg); border-radius: 8px; border: 1px solid var(--glass-border); overflow-x: auto; overflow-y: visible; width: 100%; box-shadow: 0 8px 32px rgba(0,0,0,0.15); margin-bottom: 2rem;}
-    table { width: max-content; min-width: 100%; border-collapse: separate; border-spacing: 0; font-size: 0.95rem; }
-    th, td { border: 1px solid var(--glass-border); padding: 0.6rem 0.8rem; text-align: left; white-space: nowrap; }
+    table { width: max-content; min-width: 100%; border-collapse: separate; border-spacing: 0; font-size: 0.85rem; } 
+    th, td { border: 1px solid var(--glass-border); padding: 0.35rem 0.5rem; text-align: left; white-space: nowrap; } 
     
-    th { background: var(--table-header); color: var(--text-main); font-weight: 700; text-align: center; position: sticky; top: 0; z-index: 3; backdrop-filter: blur(10px);}
-    .row-num { background: var(--table-header); width: 40px; text-align: center; color: var(--text-muted); font-weight: 600; position: sticky; left: 0; z-index: 4; }
+    th { background: var(--table-header); color: var(--text-main); font-weight: 700; text-align: center; position: sticky; top: 0; z-index: 3; backdrop-filter: blur(10px); font-size: 0.75rem; letter-spacing: -0.2px;}
+    .row-num { background: var(--table-header); width: 35px; min-width: 35px; max-width: 35px; text-align: center; color: var(--text-muted); font-weight: 600; position: sticky; left: 0; z-index: 4; padding: 0.35rem 0.2rem; }
     
-    th:nth-child(2), td:nth-child(2) { position: sticky; left: 40px; z-index: 2; border-right: 2px solid var(--accent); background: inherit; }
+    th:nth-child(2), td:nth-child(2) { position: sticky; left: 35px; z-index: 2; border-right: 2px solid var(--accent); background: inherit; }
     [data-theme="dark"] td:nth-child(2) { background: rgba(25, 15, 10, 0.98); }
     [data-theme="light"] td:nth-child(2) { background: rgba(240, 244, 248, 0.98); }
     th:nth-child(2) { z-index: 5; }
@@ -115,7 +119,7 @@
     td[contenteditable="true"]:focus { background: rgba(212, 175, 55, 0.15); box-shadow: inset 0 0 0 2px var(--accent); }
     
     .empty-target { color: rgba(100,116,139,0.5); font-style: italic; }
-    .filled-target { color: var(--success); font-weight: 700; font-family: monospace;}
+    .filled-target { color: var(--success); font-weight: 700; font-family: monospace; font-size: 0.9rem;}
     
     .dashboard-input { background: var(--cell-input); color: var(--cell-input-text); font-weight: 800; border: 1px solid var(--accent); }
     .dashboard-label { font-weight: 700; color: var(--accent); background: rgba(0,0,0,0.1); }
@@ -137,29 +141,77 @@
     .btn-next { background: var(--success); color: white; border: none; padding: 1.25rem; border-radius: 8px; font-weight: 800; font-size: 1.1rem; cursor: pointer; width: 100%; display: none; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3); }
     .btn-next:hover { transform: translateY(-2px); }
     
-    .feedback { padding: 1.5rem; border-radius: 8px; display: none; line-height: 1.7; font-size: 1.05rem; box-shadow: 0 8px 24px rgba(0,0,0,0.15);}
-    .feedback.success { background: rgba(16, 185, 129, 0.15); border: 1px solid var(--success); color: var(--success); }
-    .feedback.error { background: rgba(220, 38, 38, 0.15); border: 1px solid var(--danger); color: var(--danger); }
-    .feedback.info { background: rgba(2, 132, 199, 0.15); border: 1px solid var(--info); color: var(--info); }
+    /* =======================================================
+       UX FIX: MENCEGAH TEKS MENEMBUS LAYAR HP (WORD-WRAP)
+       ======================================================= */
+    .feedback {
+      padding: 1.5rem;
+      border-radius: 12px; 
+      display: none;
+      line-height: 1.7;
+      font-size: 1.1rem; 
+      font-weight: 500; 
+      color: #fff; 
+      position: relative; 
+      background: rgba(255, 255, 255, 0.15); 
+      backdrop-filter: blur(24px) saturate(180%);
+      -webkit-backdrop-filter: blur(24px) saturate(180%);
+      border: 1px solid rgba(255, 255, 255, 0.2); 
+      box-shadow: 0 8px 32px 0 rgba(15, 23, 42, 0.3), inset 0 0 10px rgba(255, 255, 255, 0.05); 
+      
+      /* Memaksa teks panjang untuk melipat di batas layar */
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+    }
+    
+    .feedback code {
+      word-break: break-all;
+      white-space: pre-wrap;
+    }
+
+    [data-theme="dark"] .feedback {
+        background: rgba(30, 20, 15, 0.7); 
+        border: 1px solid rgba(212, 175, 55, 0.15);
+        color: var(--text-main); 
+    }
+    [data-theme="light"] .feedback {
+        background: rgba(255, 255, 255, 0.6); 
+        border: 1px solid rgba(255, 255, 255, 0.8);
+        color: var(--text-main);
+    }
+
+    .feedback.success { 
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.8) 0%, rgba(5, 150, 105, 0.9) 100%);
+      border: 1px solid rgba(16, 185, 129, 0.2); 
+      color: #fff;
+    }
+    .feedback.error { 
+      background: linear-gradient(135deg, rgba(239, 68, 68, 0.8) 0%, rgba(220, 38, 38, 0.9) 100%);
+      border: 1px solid rgba(239, 68, 68, 0.2);
+      color: #fff;
+    }
+    .feedback.info { 
+      background: linear-gradient(135deg, rgba(2, 132, 199, 0.8) 0%, rgba(3, 105, 161, 0.9) 100%);
+      border: 1px solid rgba(2, 132, 199, 0.2);
+      color: #fff;
+    }
     
     .matrix-result-row { background: rgba(16, 185, 129, 0.15) !important; border-top: 2px solid var(--success); }
     .matrix-result-label { text-align: right; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 2px; color: var(--text-main); padding-right: 1.5rem !important;}
     .matrix-result-value { font-size: 1.8rem; font-weight: 900; color: var(--success); font-family: monospace; text-shadow: 0 0 15px rgba(16,185,129,0.3); letter-spacing: -1px;}
     
-    .feedback strong { display: block; margin-bottom: 0.5rem; font-size: 1.2rem; }
+    .feedback strong { display: block; margin-bottom: 0.5rem; font-size: 1.25rem; font-weight: 800;} 
     
-    /* UX FIX: ARCHITECTURAL EXPLANATION BLOCK */
-    .explanation-block { margin-top: 1rem; padding: 1rem; border-left: 4px solid currentColor; background: rgba(0,0,0,0.1); font-size: 0.95rem; border-radius: 0 8px 8px 0; }
-    .explanation-block h4 { margin-top: 0; margin-bottom: 0.5rem; font-size: 1rem; text-transform: uppercase; letter-spacing: 1px;}
-    .explanation-block ul { margin: 0.5rem 0; padding-left: 1.2rem; }
-    .explanation-block li { margin-bottom: 0.4rem; }
+    /* Memaksa penjelesan melipat teks di HP */
+    .explanation-block { margin-top: 1rem; padding: 1rem; border-left: 4px solid currentColor; background: rgba(0,0,0,0.1); font-size: 0.95rem; border-radius: 0 8px 8px 0; color: inherit; opacity: 1; word-wrap: break-word; } 
+    .explanation-block h4 { margin-top: 0; margin-bottom: 0.5rem; font-size: 1.1rem; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; color: inherit;}
+    .explanation-block ul { margin: 0.5rem 0; padding-left: 1.2rem; color: inherit;}
+    .explanation-block li { margin-bottom: 0.4rem; color: inherit;}
 
     @media (max-width: 768px) { 
         .app-wrapper { padding: 1rem; margin-top: 60px;} 
         .book-container { padding: 1rem; } 
         .sidebar { width: 320px; }
-    }
-    @media (max-width: 480px) {
         .button-group { flex-direction: column; } 
     }
   </style>
@@ -333,7 +385,7 @@
             <h4>Bedah Arsitektur Agregasi</h4>
             <ul>
                 <li><strong>Mekanisme Inti:</strong> Fungsi <code>${fn}</code> membaca data sebagai 1D Array (vektor tunggal). Mesin akan mengabaikan tipe data string (huruf) dan hanya memproses integer/float.</li>
-                <li><strong>Eksekusi Arsitektural:</strong> Rentang <code>${targetColLetter}2:${targetColLetter}${rows+1}</code> mengunci eksekusi murni pada kolom target. Mengapa mulai dari baris 2? Karena baris 1 direservasi secara global untuk Header tabel basis data.</li>
+                <li><strong>Eksekusi Arsitektural:</strong> Rentang <code>${targetColLetter}2:${targetColLetter}${rows+1}</code> mengunci eksekusi murni pada kolom target. Mengapa mulai dari baris 2? Karena baris 1 direservasi secara global untuk Header tabel.</li>
                 <li><strong>Keterhubungan (Impact):</strong> Memblok seluruh tabel (misal: A:Z) akan memicu pencemaran data (Data Corruption) karena kolom Decoy akan ikut dikalkulasi. Presisi spasial adalah segalanya.</li>
             </ul>
           `;
@@ -452,13 +504,13 @@
               theory = `Mode Mass-Fill: Relational Data Blending menggunakan VLOOKUP.`;
               let refLtr1 = getColLetter(refTableStartCol);
               let refLtr2 = getColLetter(refTableStartCol+1);
-              mission = `Tulis VLOOKUP di **Baris 2**. ID pencarian di Kolom A. Tabel Referensi: **${refLtr1}2** hingga **${colLetterRef}${rows+1}**. Kolom indeks adalah 2. Gunakan parameter 0. (Anggap referensi absolut untuk saat ini).`;
+              mission = `Tulis VLOOKUP di **Baris 2**. ID pencarian di Kolom A. Tabel Referensi: **${refLtr1}2** hingga **${colLetterRef}${rows+1}**. Kolom indeks adalah 2. Gunakan parameter 0 atau FALSE.`;
               strictFormula = `=VLOOKUP(A2,${refLtr1}2:${colLetterRef}${rows+1},2,0)`;
               explanation = `
                 <h4>Bedah Relational Database</h4>
                 <ul>
                     <li><strong>Mekanisme Inti:</strong> <code>VLOOKUP</code> bekerja seperti klausa <code>LEFT JOIN</code> pada SQL. Ia mencari 'Primary Key' (A2) di kolom paling kiri dari tabel referensi.</li>
-                    <li><strong>Eksekusi Arsitektural:</strong> Parameter <code>0</code> (atau FALSE) adalah perintah brutal. Ia memaksa mesin melakukan pencocokan biner eksak (Exact Match). Tanpa angka 0 ini, Excel menggunakan pencarian proksimitas (Approximate Match) yang akan memuntahkan data hantu jika ID tidak disortir secara alfabetis.</li>
+                    <li><strong>Eksekusi Arsitektural:</strong> Parameter <code>0</code> (atau FALSE) adalah perintah brutal. Ia memaksa mesin melakukan pencocokan biner eksak (Exact Match). Tanpa angka 0 ini, Excel menggunakan pencarian proksimitas (Approximate Match) yang akan memuntahkan data hantu jika ID tidak disortir.</li>
                     <li><strong>Keterhubungan (Impact):</strong> Keberhasilan rumus ini di Baris 2 memungkinkan jutaan baris log transaksi di kolom A untuk secara instan dikawinkan dengan master data harga di tempat lain.</li>
                 </ul>
               `;
@@ -561,7 +613,7 @@
                   }
                   dataMatrix.push({type: 'data', cells: row});
               }
-              theory = `Mode Propagasi: INDEX MATCH. Pemecahan kelemahan VLOOKUP (Kiri-ke-Kanan).`;
+              theory = `Mode Mass-Fill: INDEX MATCH Absolut. VLOOKUP telah lumpuh karena data kunci di kanan.`;
               mission = `Tulis rumus di **Baris 2** Kolom Target (${tLtr}). Tarik Hasil (${vLtr}) berdasarkan Kode A2 yang dicocokkan ke Kolom ${kLtr}. Rentang referensi 2-${rows+1}.`;
               strictFormula = `=INDEX(${vLtr}2:${vLtr}${rows+1},MATCH(A2,${kLtr}2:${kLtr}${rows+1},0))`;
               explanation = `
@@ -642,7 +694,8 @@
 
           if (mode === 0) {
               calcMode = "DASHBOARD";
-              let targetRowId = `PROD-${Math.floor(Math.random() * rows) + 1}`;
+              let targetRowIdNum = Math.floor(Math.random() * (rows - 2)) + 1; 
+              let targetRowId = `PROD-${targetRowIdNum}`;
               let targetMonth = ["Jan", "Feb", "Mar", "Apr", "Mei"][scale % 5];
               targetValue = Math.floor(Math.random() * 500) * 1000 + 1500;
 
@@ -677,8 +730,8 @@
                   }
                   dataMatrix.push({type: 'data', cells: row});
               }
-              theory = `Dashboard Arsitek: 2D INDEX MATCH Interaktif.`;
-              mission = `Tulis di **B4**. Tarik Harga berdasar Input B2 (Produk) dan Input B3 (Bulan). Data angka: B6:${colLetter}${rows+4}. Header produk: A6:A${rows+4}. Header bulan: B5:${colLetter}5.`;
+              theory = `Dashboard Arsitek: 2D INDEX MATCH Interaktif. Seluruh parameter dinamis.`;
+              mission = `Tulis rumus di **B4**. Tarik Harga berdasarkan Input B2 (Produk) dan Input B3 (Bulan). Matriks data angka: B6:${colLetter}${rows+4}. Header produk di A6:A${rows+4}. Header bulan di B5:${colLetter}5.`;
               strictFormula = `=INDEX(B6:${colLetter}${rows+4},MATCH(B2,A6:A${rows+4},0),MATCH(B3,B5:${colLetter}5,0))`;
               explanation = `
                 <h4>Bedah Biaxial Cartesian Mapping (2D)</h4>
@@ -710,7 +763,7 @@
               targetValue = targetArray;
 
               theory = `Mode Mass-Fill: NESTED IF(AND). Gerbang logika kembar bersarang.`;
-              mission = `Tulis di **Baris 2** (Kolom E). JIKA KPI (B2) >= ${kpiThresh} DAN Absen (C2) >= ${absThresh}, MAKA kalikan Gaji Base (D2) dengan 1.5. Jika tidak, 0.`;
+              mission = `Tulis rumus di **Baris 2** (Kolom E). JIKA KPI (B2) >= ${kpiThresh} DAN Absen (C2) >= ${absThresh}, MAKA kalikan Gaji Base (D2) dengan 1.5. Jika salah satu gagal, beri nilai 0.`;
               strictFormula = `=IF(AND(B2>=${kpiThresh},C2>=${absThresh}),D2*1.5,0)`;
               explanation = `
                 <h4>Bedah Nested Boolean Conjunction</h4>
@@ -761,10 +814,11 @@
           totalCols = Math.min(10 + Math.floor(scale / 25), 26);
           let colLtr = getColLetter(totalCols);
 
-          let targetEmp = `EMP-0${Math.floor(Math.random()*9)+1}`; 
+          let targetEmpNum = Math.floor(Math.random() * (rows - 1)) + 1; 
+          let targetEmp = `EMP-${targetEmpNum}`; 
           let deptMatch = "IT"; 
           
-          headers = ["A (ID)", "B (Gaji Pokok)", "C (Dept)", "D (Tunjangan)", "E (X)"];
+          headers = ["A (ID)", "B (Gaji)", "C (Dept)", "D (Tunjangan)", "E (X)"];
           for(let c=6; c<=totalCols; c++) headers.push(`${getColLetter(c)}`);
 
           let inputRow1 = ["EMP_SEARCH", targetEmp]; 
@@ -784,8 +838,8 @@
           let isEmpExist = false;
 
           for(let r=1; r<=rows; r++) {
-              let isTarget = Math.random() > 0.8 && !isEmpExist;
-              let empId = isTarget ? targetEmp : `EMP-9${r}`;
+              let isTarget = (r === targetEmpNum);
+              let empId = isTarget ? targetEmp : `EMP-XX${r}`;
               let dept = Math.random() > 0.5 ? "IT" : "HR";
               let gaji = Math.floor(Math.random() * 50) * 1000 + 5000;
               let tunjangan = Math.floor(Math.random() * 10) * 1000;
@@ -955,12 +1009,13 @@
         if (rowObj.type === "input") trClass = "dashboard-input";
         if (rowObj.type === "divider") trClass = "dashboard-divider";
 
+        // MEMBERIKAN ID UNTUK KOTAK PERTANYAAN (?) DI DASHBOARD MODE
         tableBody += `<tr class="${trClass}"><td class="row-num">${rowIndex + 2}</td>`;
         rowObj.cells.forEach((cell, cellIndex) => { 
             if (rowObj.type === "input" && cellIndex === 0) {
                  tableBody += `<td class="dashboard-label">${cell}</td>`;
             } else if (cell === "?") {
-               tableBody += `<td class="empty-target">?</td>`;
+               tableBody += `<td class="empty-target" id="targetQuestionMark">?</td>`;
             } else {
                tableBody += `<td contenteditable="${rowObj.type === 'data' ? 'true' : 'false'}">${cell}</td>`; 
             }
@@ -999,15 +1054,31 @@
       gsap.fromTo("#theoryPage, #practicePage", { opacity: 0, y: 15 }, { opacity: 1, y: 0, duration: 0.4, stagger: 0.1 });
     }
 
+    // ==========================================
+    // BUG FIX: DATA PARSER (MEMBERSIHKAN GHOST SPACE)
+    // ==========================================
     function getTableData() {
       const rows = document.querySelectorAll('#sandboxBody tr');
       const data = [];
+      
+      const headerRow = [];
+      document.querySelectorAll('#sandboxTable thead th:not(.row-num)').forEach(th => {
+          headerRow.push(th.textContent.trim());
+      });
+      data.push(headerRow);
+
       rows.forEach(row => {
         const rowData = [];
         const cells = row.querySelectorAll('td:not(.row-num)');
         cells.forEach(cell => {
-          let val = cell.innerText.trim();
-          rowData.push(isNaN(val) || val === '' ? val : parseFloat(val));
+          // Buang spasi gaib dari HTML DOM
+          let val = cell.textContent.trim().replace(/[\u200B-\u200D\uFEFF]/g, '');
+          
+          if (val.toUpperCase() === 'FALSE') {
+              rowData.push(0); 
+          } else {
+              rowData.push(isNaN(val) || val === '' ? val : parseFloat(val));
+          }
         });
         data.push(rowData);
       });
@@ -1015,7 +1086,7 @@
     }
 
     // ==========================================
-    // 4. MESIN EVALUASI (ARCHITECTURAL ANALYSIS FEEDBACK)
+    // 4. MESIN EVALUASI (BYPASS ABSOLUT & SYNC DASHBOARD)
     // ==========================================
     function saveProgress(level) {
         if (level > highestAchievedLevel) {
@@ -1041,13 +1112,13 @@
       const oldRow = document.getElementById('matrixResultRow');
       if (oldRow) oldRow.remove();
 
-      showFeedback(feedback, title, msg, 'info', "ANALISIS POST-MORTEM (SOLUSI)", `Sintaks Produksi: <code>${lesson.strictFormula}</code> <div class="explanation-block">${lesson.explanation}</div>`);
+      showFeedback(feedback, title, msg, 'info', "ANALISIS POST-MORTEM (SOLUSI)", `Sintaks Produksi: <br><code>${lesson.strictFormula}</code> <div class="explanation-block">${lesson.explanation}</div>`);
 
       if (currentIndex < curriculumMeta.length - 1) {
         btnNext.style.display = "block";
         gsap.fromTo(btnNext, {opacity: 0, y: 10}, {opacity: 1, y: 0, duration: 0.3});
       }
-      setTimeout(() => { window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }); }, 300);
+      setTimeout(() => { gsap.to(window, {scrollTo: document.body.scrollHeight, duration: 0.5, ease: "power2.inOut"}); }, 300);
     }
 
     function runTest() {
@@ -1069,98 +1140,166 @@
         showFeedback(feedback, title, msg, 'error', "FATAL SINTAKS", "Operator komputasi wajib diawali '='."); return;
       }
 
-      let formulaForEngine = userFormula.replace(/FALSE/gi, '0');
-      const cleanUserFormula = userFormula.toUpperCase().replace(/\s/g, '').replace(/FALSE/g, '0');
-      const cleanStrictFormula = lesson.strictFormula.toUpperCase().replace(/\s/g, '').replace(/FALSE/g, '0');
+      // Validasi String Ketat (Abaikan spasi, $ dan toleransi kata FALSE/0)
+      const cleanUserFormula = userFormula.toUpperCase().replace(/\s/g, '').replace(/\bFALSE\b/g, '0').replace(/\$/g, '');
+      const cleanStrictFormula = lesson.strictFormula.toUpperCase().replace(/\s/g, '').replace(/\bFALSE\b/g, '0').replace(/\$/g, '');
       
       let isFormulaStrict = cleanUserFormula === cleanStrictFormula;
 
-      if (!isFormulaStrict) {
-          showFeedback(feedback, title, msg, 'error', "LOGIKA DITOLAK", `Struktur sintaks Anda menyimpang dari standar korporat untuk matriks data ini. Wajib menggunakan kerangka: <code>${lesson.strictFormula}</code>`);
+      // JALUR TOL MUTLAK (BYPASS MESIN JIKA SINTAKS BENAR 100%)
+      let result;
+      let isResultCorrect = false;
+
+      if (isFormulaStrict) {
+          // BYPASS: Jika kode user persis kunci jawaban, berikan kemenangan tanpa melewati HyperFormula.
+          isResultCorrect = true;
+          result = Array.isArray(lesson.targetValue) ? lesson.targetValue[0] : lesson.targetValue;
+      } else {
+          // Buka blokir ini jika salah, biarkan HyperFormula memberi tahu Anda kenapa salah
+          let formulaForEngine = userFormula.replace(/\bFALSE\b/gi, '0');
+          let activeSheetId;
+          try {
+              const sheetName = engine.addSheet('RuntimeSheet');
+              activeSheetId = engine.getSheetId(sheetName);
+              engine.setSheetContent(activeSheetId, getTableData());
+
+              const evalCell = { sheet: activeSheetId, col: 100, row: 1000 };
+              engine.setCellContents(evalCell, [[formulaForEngine]]);
+
+              result = engine.getCellValue(evalCell);
+              
+              if (result && typeof result === 'object' && result.toString().startsWith('#')) {
+                  throw new Error(result.toString());
+              }
+
+              if(typeof result === 'number' && typeof lesson.targetValue === 'number') {
+                  isResultCorrect = (Number(result.toFixed(4)) === Number(Number(lesson.targetValue).toFixed(4)));
+              } else {
+                  isResultCorrect = (result.toString() === lesson.targetValue.toString());
+              }
+          } catch (err) {
+              result = err;
+          } finally {
+              if (activeSheetId !== undefined) engine.removeSheet(activeSheetId);
+          }
+      }
+
+      if (!isFormulaStrict && !isResultCorrect) {
+          let eMsg = result instanceof Error ? result.message : result;
+          if (eMsg && eMsg.includes('#NAME?')) eMsg = "<strong>SYNTAX ERROR (#NAME?):</strong> Anda salah mengeja nama fungsi (typo).";
+          else if (eMsg && eMsg.includes('#N/A')) eMsg = "Target data tidak ditemukan dalam matriks Array. Gunakan IFERROR untuk tameng.";
+          else if (eMsg && eMsg.includes('#VALUE!')) eMsg = "Tipe data berbenturan (misal membagi teks dengan angka).";
+          else if (eMsg && eMsg.includes('#REF!')) eMsg = "Referensi sel Anda keluar dari batas tabel riil.";
+          else eMsg = `Output Mesin: ${result}. Ekspektasi: ${Array.isArray(lesson.targetValue) ? lesson.targetValue[0] : lesson.targetValue}.`;
+          
+          showFeedback(feedback, title, msg, 'error', "INTERUPSI MESIN EXCEL", `${eMsg}<div class="explanation-block"><strong>Petunjuk Audit Logika:</strong><br>Periksa kembali rentang matriks Anda. <br><br>Wajib: <code>${lesson.strictFormula}</code></div>`);
           return;
       }
 
-      if (lesson.calcMode === "MASS_FILL") {
-          
-          const tableRows = document.querySelectorAll('#sandboxBody tr');
-          const targetArray = lesson.targetValue;
-          
-          let emptyColIndex = -1;
-          for(let i=0; i<tableRows.length; i++) {
-              const cells = tableRows[i].querySelectorAll('td');
-              for(let j=0; j<cells.length; j++) {
-                  if(cells[j].innerText === "?") {
-                      emptyColIndex = j; break;
+      // EKSEKUSI ANIMASI KEBERHASILAN (JIKA IS RESULT CORRECT)
+      if (isResultCorrect) {
+          if (lesson.calcMode === "MASS_FILL") {
+              const tableRows = document.querySelectorAll('#sandboxBody tr');
+              const targetArray = lesson.targetValue;
+              
+              let emptyColIndex = -1;
+              for(let i=0; i<tableRows.length; i++) {
+                  const cells = tableRows[i].querySelectorAll('td');
+                  for(let j=0; j<cells.length; j++) {
+                      if(cells[j].innerText === "?") {
+                          emptyColIndex = j; break;
+                      }
+                  }
+                  if (emptyColIndex !== -1) break;
+              }
+
+              if (emptyColIndex !== -1) {
+                  let targetIdx = 0;
+                  tableRows.forEach((tr, idx) => {
+                      const cell = tr.querySelectorAll('td')[emptyColIndex];
+                      if(cell && cell.innerText === "?") {
+                          cell.classList.remove('empty-target');
+                          cell.classList.add('filled-target');
+                          cell.innerText = typeof targetArray[targetIdx] === 'number' ? targetArray[targetIdx].toLocaleString('id-ID') : targetArray[targetIdx];
+                          gsap.fromTo(cell, {opacity: 0, y: -10}, {opacity: 1, y: 0, duration: 0.4, delay: targetIdx * 0.05});
+                          targetIdx++;
+                      }
+                  });
+              }
+
+              showFeedback(feedback, title, msg, 'success', "PROPAGASI MASIF BERHASIL", `Sistem telah menarik rumus Anda ke bawah (Drag-Down) untuk mengeksekusi seluruh kolom matriks secara asinkron.<div class="explanation-block">${lesson.explanation}</div>`);
+              saveProgress(lesson.globalLevel); 
+              if (currentIndex < curriculumMeta.length - 1) {
+                btnNext.style.display = "block";
+                gsap.fromTo(btnNext, {opacity: 0, y: 10}, {opacity: 1, y: 0, duration: 0.3});
+              }
+              setTimeout(() => { window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }); }, 500);
+
+          } else {
+              // BUG FIX: SINKRONISASI SEL B4 (?) PADA DASHBOARD MODE
+              let questionCell = document.getElementById("targetQuestionMark");
+              
+              const tbody = document.getElementById("sandboxBody");
+              const totalCols = lesson.columns.length + 1; 
+              
+              const tr = document.createElement("tr");
+              tr.id = "matrixResultRow";
+              tr.className = "matrix-result-row";
+              tr.innerHTML = `
+                <td colspan="${totalCols}" class="matrix-result-label">
+                    Laporan Dasbor Final: <br>
+                    <span class="matrix-result-value" id="matrixResultValue">0</span>
+                </td>
+              `;
+              tbody.appendChild(tr);
+
+              setTimeout(() => { tr.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 100);
+
+              if (typeof result === 'number') {
+                  let targetObj = { val: 0 };
+                  gsap.to(targetObj, {
+                      val: result,
+                      duration: 1.5,
+                      ease: "power3.out",
+                      onUpdate: function() {
+                          let currentVal = Math.round(this.targets()[0].val).toLocaleString('id-ID');
+                          document.getElementById("matrixResultValue").innerText = currentVal;
+                          
+                          // Sinkronisasi animasi ke sel ?
+                          if(questionCell) {
+                              questionCell.classList.remove('empty-target');
+                              questionCell.classList.add('filled-target');
+                              questionCell.innerText = currentVal;
+                          }
+                      },
+                      onComplete: function() {
+                          let finalVal = result.toLocaleString('id-ID');
+                          document.getElementById("matrixResultValue").innerText = finalVal;
+                          if(questionCell) questionCell.innerText = finalVal;
+                      }
+                  });
+              } else {
+                  document.getElementById("matrixResultValue").innerText = result;
+                  gsap.fromTo("#matrixResultValue", {scale: 0.2, opacity: 0}, {scale: 1, opacity: 1, duration: 0.8, ease: "back.out(1.7)"});
+                  
+                  // Sinkronisasi teks (seperti "REJECT") ke sel ?
+                  if(questionCell) {
+                      questionCell.classList.remove('empty-target');
+                      questionCell.classList.add('filled-target');
+                      questionCell.innerText = result;
+                      gsap.fromTo(questionCell, {scale: 0.2, opacity: 0}, {scale: 1, opacity: 1, duration: 0.8, ease: "back.out(1.7)"});
                   }
               }
-              if (emptyColIndex !== -1) break;
+
+              showFeedback(feedback, title, msg, 'success', "VALIDASI ARSITEKTUR SEMPURNA", `Komputasi agregat berhasil mengunci nilai target.<div class="explanation-block">${lesson.explanation}</div>`);
+              saveProgress(lesson.globalLevel); 
+              if (currentIndex < curriculumMeta.length - 1) {
+                btnNext.style.display = "block";
+                gsap.fromTo(btnNext, {opacity: 0, y: 10}, {opacity: 1, y: 0, duration: 0.3});
+              }
+              
+              setTimeout(() => { window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }); }, 1600);
           }
-
-          if (emptyColIndex !== -1) {
-              let targetIdx = 0;
-              tableRows.forEach((tr, idx) => {
-                  const cell = tr.querySelectorAll('td')[emptyColIndex];
-                  if(cell && cell.innerText === "?") {
-                      cell.classList.remove('empty-target');
-                      cell.classList.add('filled-target');
-                      cell.innerText = typeof targetArray[targetIdx] === 'number' ? targetArray[targetIdx].toLocaleString('id-ID') : targetArray[targetIdx];
-                      gsap.fromTo(cell, {opacity: 0, y: -10}, {opacity: 1, y: 0, duration: 0.4, delay: targetIdx * 0.05});
-                      targetIdx++;
-                  }
-              });
-          }
-
-          showFeedback(feedback, title, msg, 'success', "PROPAGASI MASIF BERHASIL", `Sistem telah menarik rumus Anda ke bawah (Drag-Down) untuk mengeksekusi seluruh kolom matriks secara asinkron.<div class="explanation-block">${lesson.explanation}</div>`);
-          saveProgress(lesson.globalLevel); 
-          if (currentIndex < curriculumMeta.length - 1) {
-            btnNext.style.display = "block";
-            gsap.fromTo(btnNext, {opacity: 0, y: 10}, {opacity: 1, y: 0, duration: 0.3});
-          }
-          setTimeout(() => { window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }); }, 500);
-
-      } else {
-          const tbody = document.getElementById("sandboxBody");
-          const totalCols = lesson.columns.length + 1; 
-          const result = lesson.targetValue;
-          
-          const tr = document.createElement("tr");
-          tr.id = "matrixResultRow";
-          tr.className = "matrix-result-row";
-          tr.innerHTML = `
-            <td colspan="${totalCols}" class="matrix-result-label">
-                Laporan Dasbor Final: <br>
-                <span class="matrix-result-value" id="matrixResultValue">0</span>
-            </td>
-          `;
-          tbody.appendChild(tr);
-
-          setTimeout(() => { tr.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 100);
-
-          if (typeof result === 'number') {
-              let targetObj = { val: 0 };
-              gsap.to(targetObj, {
-                  val: result,
-                  duration: 1.5,
-                  ease: "power3.out",
-                  onUpdate: function() {
-                      document.getElementById("matrixResultValue").innerText = Math.round(this.targets()[0].val).toLocaleString('id-ID');
-                  },
-                  onComplete: function() {
-                      document.getElementById("matrixResultValue").innerText = result.toLocaleString('id-ID');
-                  }
-              });
-          } else {
-              document.getElementById("matrixResultValue").innerText = result;
-              gsap.fromTo("#matrixResultValue", {scale: 0.2, opacity: 0}, {scale: 1, opacity: 1, duration: 0.8, ease: "back.out(1.7)"});
-          }
-
-          showFeedback(feedback, title, msg, 'success', "VALIDASI ARSITEKTUR SEMPURNA", `Komputasi agregat berhasil mengunci nilai target.<div class="explanation-block">${lesson.explanation}</div>`);
-          saveProgress(lesson.globalLevel); 
-          if (currentIndex < curriculumMeta.length - 1) {
-            btnNext.style.display = "block";
-            gsap.fromTo(btnNext, {opacity: 0, y: 10}, {opacity: 1, y: 0, duration: 0.3});
-          }
-          setTimeout(() => { window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }); }, 1600);
       }
     }
 
