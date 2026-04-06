@@ -14,38 +14,49 @@
        ========================================= */
     :root {
       --bg-page: linear-gradient(135deg, #E2E8F0 0%, #CBD5E1 100%);
-      --glass-bg: rgba(255, 255, 255, 0.65); --glass-border: rgba(255, 255, 255, 0.95);
-      --glass-shadow: 0 16px 48px 0 rgba(15, 23, 42, 0.15), inset 0 0 12px rgba(255,255,255,0.9);
-      --text-main: #020617; --text-muted: #475569; --accent: #0284C7; 
-      --input-bg: rgba(255, 255, 255, 0.8); --table-header: rgba(203, 213, 225, 0.9);
-      --danger: #DC2626; --success: #059669; --info: #0284C7;
+      --glass-bg: rgba(255, 255, 255, 0.4); --glass-border: rgba(255, 255, 255, 0.8);
+      --glass-shadow: 0 16px 40px 0 rgba(15, 23, 42, 0.15), inset 0 0 10px rgba(255, 255, 255, 0.9);
+      --text-main: #0F172A; --text-muted: #334155; --accent: #0284C7; 
+      --input-bg: rgba(255, 255, 255, 0.7); --table-header: rgba(203, 213, 225, 0.85);
+      --danger: #DC2626; --success: #059669; --info: #0284C7; --overlay-bg: rgba(255, 255, 255, 0.3);
     }
 
     [data-theme="dark"] {
-      --bg-page: linear-gradient(135deg, #120B09 0%, #1C110F 100%); 
-      --glass-bg: rgba(28, 17, 15, 0.6); --glass-border: rgba(194, 155, 64, 0.18); 
-      --glass-shadow: 0 16px 48px 0 rgba(0, 0, 0, 0.8), inset 0 0 6px rgba(194, 155, 64, 0.08);
-      --text-main: #F3F1ED; --text-muted: #D2CBC3; --accent: #C29B40; 
-      --input-bg: rgba(18, 11, 9, 0.8); --table-header: rgba(35, 22, 19, 0.95);
-      --danger: #EF4444; --success: #10B981; --info: #FBBF24;
+      --bg-page: linear-gradient(135deg, #1A0F0A 0%, #0D0705 100%); 
+      --glass-bg: rgba(30, 20, 15, 0.65); --glass-border: rgba(212, 175, 55, 0.25); 
+      --glass-shadow: 0 16px 48px 0 rgba(0, 0, 0, 0.9), inset 0 0 8px rgba(212, 175, 55, 0.08);
+      --text-main: #FDF8F5; --text-muted: #D7CCC8; --accent: #D4AF37; 
+      --input-bg: rgba(15, 10, 8, 0.8); --table-header: rgba(40, 25, 20, 0.95);
+      --danger: #EF4444; --success: #10B981; --info: #FBBF24; --overlay-bg: rgba(0, 0, 0, 0.6);
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease; }
-    
+    * { box-sizing: border-box; margin: 0; padding: 0; transition: background-color 0.4s ease, color 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease; }
     ::-webkit-scrollbar { width: 8px; height: 8px; }
-    ::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); border-radius: 4px; }
+    ::-webkit-scrollbar-track { background: rgba(0,0,0,0.15); border-radius: 4px; }
     ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 4px; }
 
-    body { font-family: 'Inter', system-ui, sans-serif; color: var(--text-main); background: var(--bg-page); background-size: cover; background-position: center; background-attachment: fixed; min-height: 100vh; display: flex; justify-content: center; padding: 1rem; }
+    body { font-family: 'Inter', system-ui, sans-serif; color: var(--text-main); background: var(--bg-page); min-height: 100vh; overflow-x: hidden; margin: 0; padding: 0;}
+    .glass { background: var(--glass-bg); backdrop-filter: blur(32px); -webkit-backdrop-filter: blur(32px); border: 1px solid var(--glass-border); box-shadow: var(--glass-shadow); }
 
-    .glass { background: var(--glass-bg); backdrop-filter: blur(28px); -webkit-backdrop-filter: blur(28px); border: 1px solid var(--glass-border); border-radius: 16px; box-shadow: var(--glass-shadow); }
+    .top-bar { position: fixed; top: 0; left: 0; width: 100%; height: 60px; display: flex; justify-content: space-between; align-items: center; padding: 0 1.5rem; z-index: 50; border-radius: 0; border-top: none; border-left: none; border-right: none;}
+    .menu-btn { background: transparent; border: none; color: var(--text-main); font-size: 1.5rem; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; font-weight: 700; font-family: inherit;}
+    .menu-btn:hover { color: var(--accent); }
+    .top-level-indicator { font-weight: 800; font-size: 1rem; color: var(--accent); letter-spacing: 1px;}
 
-    .app-wrapper { display: grid; grid-template-columns: 320px 1fr; gap: 1.5rem; width: 100%; max-width: 1600px; align-items: start; }
+    .app-wrapper { margin-top: 60px; width: 100%; display: flex; justify-content: center; padding: 1.5rem; }
+    .book-container { width: 100%; max-width: 1200px; display: flex; flex-direction: column; gap: 2rem; padding: 2rem; border-radius: 20px;}
+
+    .sidebar { position: fixed; top: 0; left: 0; height: 100vh; width: 350px; display: flex; flex-direction: column; padding: 1.5rem; z-index: 100; transform: translateX(-100%); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); border-radius: 0; border-top: none; border-left: none; border-bottom: none;}
+    .sidebar.open { transform: translateX(0); }
     
-    .sidebar { display: flex; flex-direction: column; padding: 1.5rem; position: sticky; top: 1rem; max-height: calc(100vh - 2rem); overflow-y: auto; }
     .sidebar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
-    .sidebar h1 { font-size: 1.2rem; font-weight: 800; color: var(--accent); }
+    .sidebar h1 { font-size: 1.5rem; font-weight: 800; color: var(--accent); }
+    .close-btn { background: transparent; border: none; color: var(--text-main); font-size: 2rem; cursor: pointer; line-height: 1; }
+    .close-btn:hover { color: var(--danger); }
     
+    .overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: var(--overlay-bg); backdrop-filter: blur(4px); z-index: 90; opacity: 0; pointer-events: none; transition: opacity 0.4s ease; }
+    .overlay.active { opacity: 1; pointer-events: auto; }
+
     .tracker-box { background: rgba(0,0,0,0.2); border: 1px solid var(--accent); border-radius: 8px; padding: 1rem; margin-bottom: 1.5rem; text-align: center; }
     [data-theme="light"] .tracker-box { background: rgba(2, 132, 199, 0.1); }
     .tracker-box h3 { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 1px;}
@@ -54,33 +65,37 @@
     [data-theme="light"] .btn-resume { color: #fff; }
     .btn-resume:hover { transform: translateY(-2px); }
 
-    .theme-toggle { background: var(--input-bg); border: 1px solid var(--glass-border); color: var(--text-main); padding: 0.5rem; border-radius: 8px; cursor: pointer; font-weight: 600; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 1rem;}
-    .search-box { width: 100%; padding: 0.75rem 1rem; margin-bottom: 1.5rem; background: var(--input-bg); border: 1px solid var(--glass-border); border-radius: 8px; color: var(--text-main); outline: none; box-shadow: inset 0 2px 4px rgba(0,0,0,0.2); }
+    .theme-toggle { background: var(--input-bg); border: 1px solid var(--glass-border); color: var(--text-main); padding: 0.75rem; border-radius: 8px; cursor: pointer; font-weight: 600; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 1rem; width: 100%;}
+    
+    /* UX FIX: SEARCH INPUT DENGAN TOMBOL CARI/ENTER MUTLAK */
+    .search-container { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; }
+    .search-box { flex: 1; padding: 0.85rem 1rem; background: var(--input-bg); border: 1px solid var(--glass-border); border-radius: 8px; color: var(--text-main); outline: none; box-shadow: inset 0 2px 4px rgba(0,0,0,0.2); font-size: 1rem; min-width: 0;}
     .search-box:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(212,175,55,0.2); }
+    .btn-search { background: var(--accent); color: #000; border: none; padding: 0 1rem; border-radius: 8px; font-weight: 700; cursor: pointer; transition: transform 0.2s; white-space: nowrap;}
+    [data-theme="light"] .btn-search { color: #fff; }
+    .btn-search:hover { transform: translateY(-2px); }
 
-    .toc-list { display: flex; flex-direction: column; gap: 0.5rem; }
+    .toc-list { display: flex; flex-direction: column; gap: 0.5rem; overflow-y: auto; padding-right: 0.5rem; flex: 1;}
     .toc-item { padding: 1rem; border-radius: 8px; cursor: pointer; border: 1px solid transparent; color: var(--text-main); display: flex; flex-direction: column; }
     .toc-item:hover { background: var(--input-bg); border-color: var(--glass-border); }
     .toc-item.active { border-left: 4px solid var(--accent); background: var(--input-bg); font-weight: 600; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
     
-    .level-badge { font-size: 0.7rem; padding: 0.25rem 0.5rem; border-radius: 4px; width: fit-content; margin-bottom: 0.5rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;}
-    .lvl-pemula { background: rgba(16, 185, 129, 0.15); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.3); }
-    .lvl-menengah { background: rgba(2, 132, 199, 0.15); color: var(--info); border: 1px solid rgba(2, 132, 199, 0.3); }
-    .lvl-master { background: rgba(212, 175, 55, 0.15); color: var(--accent); border: 1px solid rgba(212, 175, 55, 0.3); }
-    .lvl-grandmaster { background: rgba(220, 38, 38, 0.15); color: var(--danger); border: 1px solid rgba(220, 38, 38, 0.3); }
+    /* UX FIX: RUANG NAPAS JUDUL & BADGE */
+    .level-badge { font-size: 0.75rem; padding: 0.35rem 0.75rem; border-radius: 6px; width: fit-content; margin-bottom: 1rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; display: inline-block;}
+    .lvl-pemula { background: rgba(16, 185, 129, 0.15); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.4); }
+    .lvl-menengah { background: rgba(2, 132, 199, 0.15); color: var(--info); border: 1px solid rgba(2, 132, 199, 0.4); }
+    .lvl-master { background: rgba(245, 158, 11, 0.15); color: #D97706; border: 1px solid rgba(245, 158, 11, 0.4); }
+    .lvl-grandmaster { background: rgba(220, 38, 38, 0.15); color: var(--danger); border: 1px solid rgba(220, 38, 38, 0.4); }
     .lvl-arsitek { background: rgba(147, 51, 234, 0.15); color: #C084FC; border: 1px solid rgba(147, 51, 234, 0.4); } 
     [data-theme="light"] .lvl-arsitek { color: #7E22CE; }
     .lvl-titan { background: rgba(255, 255, 255, 0.1); color: #F8FAFC; border: 1px solid #FFFFFF; text-shadow: 0 0 5px rgba(255,255,255,0.5); }
     [data-theme="light"] .lvl-titan { background: #000; color: #fff; border: 1px solid #000; }
 
-    .book-container { display: flex; flex-direction: column; gap: 2rem; padding: 2.5rem; }
-    
-    .page { display: flex; flex-direction: column; gap: 1.5rem; width: 100%; }
-    .page h2 { font-size: 1.8rem; color: var(--accent); line-height: 1.2; text-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-    .page p { line-height: 1.7; color: var(--text-muted); font-size: 1rem; font-weight: 500;}
-    .syntax-box { background: var(--input-bg); padding: 1.25rem; border-radius: 8px; border: 1px solid var(--glass-border); font-family: monospace; color: var(--accent); line-height: 1.5; box-shadow: inset 0 4px 8px rgba(0,0,0,0.1); }
+    .page h2 { font-size: 2.2rem; color: var(--accent); line-height: 1.2; text-shadow: 0 2px 8px rgba(0,0,0,0.3); margin-top: 0; margin-bottom: 0.5rem;}
+    .page p { line-height: 1.7; color: var(--text-muted); font-size: 1.05rem; font-weight: 500;}
+    .syntax-box { background: var(--input-bg); padding: 1.25rem; border-radius: 8px; border: 1px solid var(--glass-border); font-family: monospace; color: var(--accent); line-height: 1.5; box-shadow: inset 0 4px 8px rgba(0,0,0,0.1); margin: 1rem 0; }
 
-    .table-wrapper { background: var(--input-bg); border-radius: 8px; border: 1px solid var(--glass-border); overflow-x: auto; overflow-y: visible; width: 100%; box-shadow: 0 8px 32px rgba(0,0,0,0.15); }
+    .table-wrapper { background: var(--input-bg); border-radius: 8px; border: 1px solid var(--glass-border); overflow-x: auto; overflow-y: visible; width: 100%; box-shadow: 0 8px 32px rgba(0,0,0,0.15); margin-bottom: 2rem;}
     table { width: max-content; min-width: 100%; border-collapse: separate; border-spacing: 0; font-size: 0.95rem; }
     th, td { border: 1px solid var(--glass-border); padding: 0.85rem 1rem; text-align: left; white-space: nowrap; }
     
@@ -95,62 +110,75 @@
     td[contenteditable="true"] { outline: none; }
     td[contenteditable="true"]:focus { background: rgba(212, 175, 55, 0.15); box-shadow: inset 0 0 0 2px var(--accent); }
 
-    .test-zone { display: flex; flex-direction: column; gap: 1rem; margin-top: 2rem; position: sticky; bottom: 1rem; z-index: 10; }
+    .test-zone { display: flex; flex-direction: column; gap: 1rem; position: sticky; bottom: 1rem; z-index: 10; margin-top: 1rem;}
     textarea.auto-expand { width: 100%; padding: 1.25rem; border-radius: 8px; border: 1px solid var(--glass-border); background: var(--input-bg); color: var(--text-main); font-family: monospace; font-size: 1.1rem; outline: none; resize: none; overflow: hidden; min-height: 60px; line-height: 1.5; box-shadow: 0 10px 30px rgba(0,0,0,0.5); backdrop-filter: blur(10px);}
     textarea.auto-expand:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(212,175,55,0.25), 0 10px 30px rgba(0,0,0,0.5); }
     
     .button-group { display: flex; gap: 1rem; }
-    .btn-test { flex: 2; background: var(--accent); color: #000; border: none; padding: 1rem; border-radius: 8px; font-weight: 800; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 4px 15px rgba(212, 175, 55, 0.2);}
+    .btn-test { flex: 2; background: var(--accent); color: #000; border: none; padding: 1.25rem; border-radius: 8px; font-weight: 800; font-size: 1.1rem; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 4px 15px rgba(212, 175, 55, 0.2);}
     [data-theme="light"] .btn-test { color: #fff; }
-    .btn-giveup { flex: 1; background: var(--input-bg); color: var(--text-main); border: 1px solid var(--glass-border); padding: 1rem; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.2s;}
+    .btn-giveup { flex: 1; background: var(--input-bg); color: var(--text-main); border: 1px solid var(--glass-border); padding: 1.25rem; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.2s;}
     .btn-test:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(212, 175, 55, 0.4); }
     .btn-giveup:hover { border-color: var(--accent); }
 
-    .btn-next { background: var(--success); color: white; border: none; padding: 1rem; border-radius: 8px; font-weight: 800; cursor: pointer; width: 100%; display: none; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3); }
+    .btn-next { background: var(--success); color: white; border: none; padding: 1.25rem; border-radius: 8px; font-weight: 800; font-size: 1.1rem; cursor: pointer; width: 100%; display: none; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3); }
     .btn-next:hover { transform: translateY(-2px); }
     
-    .feedback { padding: 1.25rem; border-radius: 8px; display: none; line-height: 1.6; font-size: 1rem; box-shadow: 0 8px 24px rgba(0,0,0,0.15);}
+    .feedback { padding: 1.5rem; border-radius: 8px; display: none; line-height: 1.6; font-size: 1.05rem; box-shadow: 0 8px 24px rgba(0,0,0,0.15);}
     .feedback.success { background: rgba(16, 185, 129, 0.2); border: 1px solid var(--success); color: var(--success); }
     .feedback.error { background: rgba(220, 38, 38, 0.2); border: 1px solid var(--danger); color: var(--danger); }
     .feedback.info { background: rgba(2, 132, 199, 0.2); border: 1px solid var(--info); color: var(--info); }
+    .feedback strong { display: block; margin-bottom: 0.5rem; font-size: 1.2rem; }
 
-    @media (max-width: 1024px) { 
-        body { padding: 0.5rem; } 
-        .app-wrapper { grid-template-columns: 1fr; gap: 1rem; } 
-        .sidebar { position: relative; top: 0; max-height: max-content; padding: 1rem; } 
-        .book-container { padding: 1rem; gap: 1.5rem; } 
+    @media (max-width: 768px) { 
+        .app-wrapper { padding: 1rem; margin-top: 60px;} 
+        .book-container { padding: 1rem; } 
         .button-group { flex-direction: column; } 
+        .sidebar { width: 300px; }
     }
   </style>
 </head>
 <body>
 
+  <nav class="top-bar glass">
+    <button class="menu-btn" onclick="openSidebar()">☰ Menu</button>
+    <div class="top-level-indicator" id="topLevelText">TITAN ENGINE</div>
+  </nav>
+
+  <div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+
+  <aside class="sidebar glass" id="sidebar">
+    <div class="sidebar-header">
+      <h1>Omniverse 5000</h1>
+      <button class="close-btn" onclick="closeSidebar()">×</button>
+    </div>
+    
+    <div class="tracker-box">
+      <h3>Rekor Tertinggi</h3>
+      <div class="val" id="highestLevelDisplay">0</div>
+      <button class="btn-resume" onclick="resumeJourney()">Lanjutkan Rekor</button>
+    </div>
+
+    <button class="theme-toggle" onclick="toggleTheme()">🌓 Ganti Tema Tampilan</button>
+    
+    <div class="search-container">
+      <input type="text" id="searchInput" class="search-box" placeholder="Ketik level (cth: 2000)..." oninput="handleTyping(event)" onkeydown="handleEnterKey(event)">
+      <button class="btn-search" onclick="executeExactSearch()">Cari</button>
+    </div>
+
+    <div class="toc-list" id="tocList"></div>
+  </aside>
+
   <div class="app-wrapper">
-    <aside class="sidebar glass">
-      <div class="sidebar-header">
-        <h1>Titan Engine 5K</h1>
-      </div>
-      
-      <div class="tracker-box">
-        <h3>Rekor Tertinggi</h3>
-        <div class="val" id="highestLevelDisplay">0</div>
-        <button class="btn-resume" onclick="resumeJourney()">Lanjutkan Perjalanan</button>
-      </div>
-
-      <button class="theme-toggle" onclick="toggleTheme()">🌓 Ganti Tema</button>
-      <input type="text" id="searchInput" class="search-box" placeholder="Ketik angka level (1-5000)..." onkeyup="handleSearch(event)">
-      <div class="toc-list" id="tocList"></div>
-    </aside>
-
     <main class="book-container glass" id="bookContainer">
-      <section class="page" id="theoryPage"><h2>Memuat 5000 Matriks...</h2></section>
+      <section class="page" id="theoryPage"><h2>Inisialisasi Sistem...</h2></section>
       <section class="page" id="practicePage"></section>
     </main>
   </div>
 
   <script>
     // ==========================================
-    // 1. JIT METADATA GENERATOR (5000 LEVEL - 6 TIER)
+    // 1. JIT METADATA GENERATOR (5000 LEVEL)
     // ==========================================
     let curriculumMeta = [];
     let currentIndex = 0;
@@ -159,6 +187,15 @@
 
     document.getElementById('highestLevelDisplay').innerText = highestAchievedLevel;
 
+    function openSidebar() {
+        document.getElementById('sidebar').classList.add('open');
+        document.getElementById('overlay').classList.add('active');
+    }
+    function closeSidebar() {
+        document.getElementById('sidebar').classList.remove('open');
+        document.getElementById('overlay').classList.remove('active');
+    }
+
     function resumeJourney() {
         const foundIndex = curriculumMeta.findIndex(c => c.globalLevel === highestAchievedLevel);
         if (foundIndex !== -1) {
@@ -166,6 +203,7 @@
             document.getElementById("searchInput").value = '';
             renderTOC();
             loadLesson(); 
+            closeSidebar();
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
     }
@@ -184,27 +222,27 @@
       const TOTAL_LEVELS = 5000;
       
       for(let i=1; i<=TOTAL_LEVELS; i++) {
-        let tier, levelStr, badge, titleStr, type, baseScale;
+        let tierNum, levelStr, badge, titleStr, type, baseScale;
         
         if (i <= 500) {
-            tier = 1; levelStr = `Pemula (${i}/500)`; badge = "lvl-pemula"; type = "AGGREGATION"; baseScale = i;
+            tierNum = 1; levelStr = `Pemula (${i}/500)`; badge = "lvl-pemula"; type = "AGGREGATION"; baseScale = i;
         } else if (i <= 1000) {
-            tier = 2; levelStr = `Menengah (${i - 500}/500)`; badge = "lvl-menengah"; type = "LOGIC_TEXT"; baseScale = i - 500;
+            tierNum = 2; levelStr = `Menengah (${i - 500}/500)`; badge = "lvl-menengah"; type = "LOGIC_TEXT"; baseScale = i - 500;
         } else if (i <= 1500) {
-            tier = 3; levelStr = `Master (${i - 1000}/500)`; badge = "lvl-master"; type = "LOOKUP_SUMIF"; baseScale = i - 1000;
+            tierNum = 3; levelStr = `Master (${i - 1000}/500)`; badge = "lvl-master"; type = "LOOKUP_SUMIF"; baseScale = i - 1000;
         } else if (i <= 2500) {
-            tier = 4; levelStr = `Grandmaster (${i - 1500}/1000)`; badge = "lvl-grandmaster"; type = "INDEX_MATCH_SUMIFS"; baseScale = i - 1500;
+            tierNum = 4; levelStr = `Grandmaster (${i - 1500}/1000)`; badge = "lvl-grandmaster"; type = "INDEX_MATCH_SUMIFS"; baseScale = i - 1500;
         } else if (i <= 4000) {
-            tier = 5; levelStr = `Arsitek Data (${i - 2500}/1500)`; badge = "lvl-arsitek"; type = "GOD_TIER_NESTED"; baseScale = i - 2500;
+            tierNum = 5; levelStr = `Arsitek Data (${i - 2500}/1500)`; badge = "lvl-arsitek"; type = "GOD_TIER_NESTED"; baseScale = i - 2500;
         } else {
-            // TIER 6: TITAN (4001 - 5000) - Real Financial Modeler
-            tier = 6; levelStr = `TITAN (${i - 4000}/1000)`; badge = "lvl-titan"; type = "TITAN_COMPLEX"; baseScale = i - 4000;
+            tierNum = 6; levelStr = `TITAN (${i - 4000}/1000)`; badge = "lvl-titan"; type = "TITAN_COMPLEX"; baseScale = i - 4000;
         }
 
         titleStr = `Misi ${type} [Ref: ${Math.floor(Math.random()*90000)+10000}]`;
 
         curriculumMeta.push({
           globalLevel: i,
+          tier: tierNum, 
           levelStr: levelStr,
           badgeClass: badge,
           title: titleStr,
@@ -215,7 +253,7 @@
     }
 
     // ==========================================
-    // 2. JUST-IN-TIME (JIT) DATA COMPILER
+    // 2. JIT COMPILER
     // ==========================================
     function compileLevelData(meta) {
       const scale = meta.scale; 
@@ -226,9 +264,6 @@
       const DECOY_HEADERS = ["(Margin)", "(Pajak)", "(Batch)", "(Gudang)", "(Sisa)", "(Diskon)", "(Shift)", "(Bonus)"];
       const genDecoy = () => Math.floor(Math.random()*9999);
 
-      // KURVA GRADIAN HALUS (Micro-Scaling)
-      // Baris dan kolom bertambah pelan-pelan berdasarkan pembagian yang besar.
-      
       if (meta.type === "AGGREGATION") {
           let fns = ['SUM', 'AVERAGE', 'MAX', 'MIN'];
           let fn = fns[scale % 4];
@@ -334,7 +369,8 @@
           } else {
               let critColIndex = 2 + (scale % 4); 
               let valColIndex = critColIndex + 2 + (scale % 5);
-              if (valColIndex > totalCols) valColIndex = totalCols;
+              totalCols = Math.max(totalCols, valColIndex);
+              
               let cLtr = getColLetter(critColIndex);
               let vLtr = getColLetter(valColIndex);
               const regs = ["JKT", "SBY", "MDN", "BDG", "DPS"];
@@ -374,6 +410,7 @@
           if (mode === 0) { 
               let valColIndex = 2 + (scale%5); 
               let keyColIndex = valColIndex + 3 + (scale%8); 
+              totalCols = Math.max(totalCols, keyColIndex, valColIndex);
               let vLtr = getColLetter(valColIndex);
               let kLtr = getColLetter(keyColIndex);
 
@@ -405,6 +442,8 @@
               let crit1Col = 2 + (scale%3);
               let crit2Col = crit1Col + 2 + (scale%4);
               let valCol = crit2Col + 2 + (scale%5);
+              totalCols = Math.max(totalCols, valCol);
+              
               let c1Ltr = getColLetter(crit1Col);
               let c2Ltr = getColLetter(crit2Col);
               let vLtr = getColLetter(valCol);
@@ -444,7 +483,7 @@
       else if (meta.type === "GOD_TIER_NESTED") {
           rows = Math.min(20 + Math.floor(scale / 10), 200); 
           totalCols = Math.min(10 + Math.floor(scale / 20), 26);
-          let mode = scale % 2;
+          let mode = scale % 3;
 
           if (mode === 0) {
               let targetRowId = `PROD-${Math.floor(Math.random() * rows) + 1}`;
@@ -470,11 +509,11 @@
                   }
                   dataMatrix.push(row);
               }
-              theory = `2D INDEX MATCH. Bersarang absolut. Dua fungsi MATCH di dalam satu INDEX.`;
+              theory = `2D INDEX MATCH. Dua fungsi MATCH di dalam satu INDEX.`;
               mission = `Tarik Harga untuk Produk '${targetRowId}' pada bulan '${targetMonth}'. Matriks data: B2:${colLetter}${rows}. Baris produk di A2:A${rows}. Kolom bulan di B1:${colLetter}1.`;
               strictFormula = `=INDEX(B2:${colLetter}${rows},MATCH("${targetRowId}",A2:A${rows},0),MATCH("${targetMonth}",B1:${colLetter}1,0))`;
               explanation = `INDEX(matriks, baris_match, kolom_match).`;
-          } else {
+          } else if (mode === 1) {
               let kpiThresh = 90; let absThresh = 95;
               headers = ["A (Nama)", "B (KPI)", "C (Absen)", "D (Gaji Base)", "E (Decoy)"];
               for(let c=6; c<=totalCols; c++) headers.push(`${getColLetter(c)}`);
@@ -494,18 +533,36 @@
               mission = `Evaluasi Baris 1: JIKA KPI (Sel B1) >= ${kpiThresh} DAN Absen (Sel C1) >= ${absThresh}, MAKA kalikan Gaji Base (Sel D1) dengan 1.5. Jika salah satu gagal, beri nilai 0.`;
               strictFormula = `=IF(AND(B1>=${kpiThresh},C1>=${absThresh}),D1*1.5,0)`;
               explanation = `AND memaksa kedua kondisi harus TRUE.`;
+          } else {
+              let targetId = `ID-999`; 
+              let colLetter = getColLetter(totalCols);
+
+              headers = ["A (ID)", "B (Harga)", "C (Decoy)"];
+              for(let c=4; c<=totalCols; c++) headers.push(`${getColLetter(c)}`);
+
+              for(let r=1; r<=rows; r++) {
+                  let row = [`ID-${r}`, Math.floor(Math.random() * 500) * 1000];
+                  for(let c=3; c<=totalCols; c++) row.push(genDecoy());
+                  dataMatrix.push(row);
+              }
+
+              targetValue = "REJECT";
+              theory = `Matriks Bertameng. IFERROR dalam satu baris.`;
+              mission = `Gunakan VLOOKUP untuk mencari Harga (Kolom B) dari ID '${targetId}'. Kalikan hasil tersebut dengan 1.11 (Pajak). Karena ID fiktif, bungkus dengan IFERROR agar mencetak "REJECT" (tanpa kutip di dalam rumus).`;
+              strictFormula = `=IFERROR(VLOOKUP("${targetId}",A1:${colLetter}${rows},2,0)*1.11,"REJECT")`;
+              explanation = `VLOOKUP gagal memicu IFERROR.`;
           }
       }
       else { 
           // TIER 6: TITAN COMPLEX (FINANCIAL DASHBOARD MODELING)
           rows = Math.min(30 + Math.floor(scale / 10), 300); 
-          totalCols = Math.min(10 + Math.floor(scale / 30), 26);
+          totalCols = Math.min(10 + Math.floor(scale / 25), 26);
           let colLtr = getColLetter(totalCols);
 
-          let targetEmp = `EMP-0${Math.floor(Math.random()*9)+1}`; // Kemungkinan ID tidak ada di tabel sangat besar
-          let deptMatch = "IT"; // Kita akan sumif berdasarkan departemen ini
+          let targetEmp = `EMP-0${Math.floor(Math.random()*9)+1}`; 
+          let deptMatch = "IT"; 
           
-          headers = ["A (ID Karyawan)", "B (Gaji Pokok)", "C (Departemen)", "D (Tunjangan)", "E (Decoy)"];
+          headers = ["A (ID)", "B (Gaji)", "C (Dept)", "D (Tunjangan)", "E (X)"];
           for(let c=6; c<=totalCols; c++) headers.push(`${getColLetter(c)}`);
 
           let totalTunjanganIT = 0;
@@ -527,15 +584,11 @@
               if (dept === deptMatch) totalTunjanganIT += tunjangan;
           }
 
-          // RUMUS TITAN: IFERROR(VLOOKUP * SUMIFS, 0)
-          if(isEmpExist) {
-              targetValue = empGaji * totalTunjanganIT;
-          } else {
-              targetValue = 0;
-          }
+          if(isEmpExist) targetValue = empGaji * totalTunjanganIT;
+          else targetValue = 0;
 
           theory = `TITAN CLASS: Financial Modeling. Rumus ini menyiksa memori Anda. Kombinasi 3 logika korporat dalam satu baris.`;
-          mission = `Cari Gaji Pokok (Kolom B) karyawan '${targetEmp}' dengan VLOOKUP. KALIKAN hasil tersebut dengan Total Tunjangan (Kolom D) khusus Departemen '${deptMatch}' (Kolom C) menggunakan SUMIF. JIKA VLOOKUP gagal (karyawan resign/#N/A), bungkus semuanya dengan IFERROR untuk memuntahkan angka 0. Tabel A1:${colLtr}${rows}.`;
+          mission = `Cari Gaji (Kolom B) karyawan '${targetEmp}' dengan VLOOKUP. KALIKAN hasil tersebut dengan Total Tunjangan (Kolom D) khusus Dept '${deptMatch}' (Kolom C) menggunakan SUMIF. JIKA VLOOKUP gagal (karyawan resign), bungkus semuanya dengan IFERROR untuk memuntahkan angka 0. Tabel A1:${colLtr}${rows}.`;
           strictFormula = `=IFERROR(VLOOKUP("${targetEmp}",A1:${colLtr}${rows},2,0)*SUMIF(C1:C${rows},"${deptMatch}",D1:D${rows}),0)`;
           explanation = `Matematika Dieksekusi pertama. Jika VLOOKUP gagal, seluruh perhitungan di dalam IFERROR akan gagal dan mengembalikan angka 0 mutlak.`;
       }
@@ -550,52 +603,86 @@
     }
 
     // ==========================================
-    // 3. UI LOGIC & RENDER (SMART SEARCH)
+    // 3. UI LOGIC (FILTER PISAH & PENGHANCURAN BATAS TIER)
     // ==========================================
     function toggleTheme() {
       const body = document.documentElement;
       body.setAttribute("data-theme", body.getAttribute("data-theme") === "light" ? "dark" : "light");
     }
 
-    function handleSearch(e) {
+    // Event oninput HANYA untuk live filtering daftar TOC
+    function handleTyping(e) {
       const query = e.target.value.trim().toLowerCase();
       renderTOC(query);
-      
-      const isNumber = /^\d+$/.test(query);
-      if (isNumber && parseInt(query) >= 1 && parseInt(query) <= 5000) {
-         const foundIndex = curriculumMeta.findIndex(c => c.globalLevel.toString() === query);
-         if (foundIndex !== -1) {
-            currentIndex = foundIndex;
-            loadLesson(); 
-         }
-      }
+    }
+
+    // Eksekusi mutlak via Enter
+    function handleEnterKey(e) {
+        if (e.key === 'Enter') {
+            executeExactSearch();
+        }
+    }
+
+    // Eksekusi mutlak via Tombol atau Enter
+    function executeExactSearch() {
+        const query = document.getElementById("searchInput").value.trim().toLowerCase();
+        if (!query) return;
+
+        const isNumber = /^\d+$/.test(query);
+        if (isNumber) {
+            const targetLevel = parseInt(query);
+            if (targetLevel >= 1 && targetLevel <= 5000) {
+                const foundIndex = curriculumMeta.findIndex(c => c.globalLevel === targetLevel);
+                if (foundIndex !== -1) {
+                    currentIndex = foundIndex;
+                    loadLesson();
+                    closeSidebar();
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+            }
+        }
     }
 
     function renderTOC(query = "") {
       const list = document.getElementById("tocList");
       list.innerHTML = "";
       
-      const filtered = curriculumMeta.filter(c => 
-          c.title.toLowerCase().includes(query) || 
-          c.levelStr.toLowerCase().includes(query) ||
-          c.globalLevel.toString() === query 
-      );
+      let filtered = [];
+      const isNumber = /^\d+$/.test(query);
+
+      // FIX UX: Hancurkan Batas Tier. Ambil sisa level murni secara linear.
+      if (isNumber && query !== "") {
+          const targetLvl = parseInt(query);
+          filtered = curriculumMeta.filter(c => c.globalLevel >= targetLvl);
+      } else {
+          filtered = curriculumMeta.filter(c => 
+              c.title.toLowerCase().includes(query) || 
+              c.levelStr.toLowerCase().includes(query) ||
+              c.globalLevel.toString() === query 
+          );
+      }
       
-      const renderLimit = query === "" ? filtered.slice(0, 50) : filtered.slice(0, 100);
+      // Limit 100 DOM Nodes agar tidak lag
+      const renderLimit = filtered.slice(0, 100); 
 
       renderLimit.forEach((item) => {
         const originalIndex = curriculumMeta.findIndex(c => c.globalLevel === item.globalLevel);
         const div = document.createElement("div");
         div.className = `toc-item ${originalIndex === currentIndex ? 'active' : ''}`;
-        div.onclick = () => { currentIndex = originalIndex; loadLesson(); };
+        div.onclick = () => { 
+            currentIndex = originalIndex; 
+            loadLesson(); 
+            closeSidebar(); 
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
         div.innerHTML = `<span class="level-badge ${item.badgeClass}">LVL ${item.globalLevel} | ${item.levelStr}</span><span>${item.title}</span>`;
         list.appendChild(div);
       });
 
       if(filtered.length > renderLimit.length) {
         let note = document.createElement("div");
-        note.style = "padding: 1rem; color: var(--text-muted); font-size: 0.8rem; text-align: center;";
-        note.innerText = `+ ${filtered.length - renderLimit.length} Level tersembunyi. Ketik angka 1 hingga 5000.`;
+        note.style = "padding: 1rem; color: var(--text-muted); font-size: 0.85rem; text-align: center; font-weight: 600;";
+        note.innerText = `+ ${filtered.length - renderLimit.length} Level selanjutnya tersedia.`;
         list.appendChild(note);
       }
     }
@@ -607,13 +694,13 @@
       activeCompiledLesson = compileLevelData(meta); 
       const lesson = activeCompiledLesson;
 
-      document.querySelectorAll('.toc-item').forEach((el, i) => {
-          el.classList.remove('active');
-          if(el.innerHTML.includes(`LVL ${lesson.globalLevel} |`)) el.classList.add('active');
-      });
+      document.getElementById("topLevelText").innerText = `LVL ${lesson.globalLevel}: ${lesson.levelStr.split(' ')[0]}`;
+
+      const currentSearch = document.getElementById("searchInput").value.trim().toLowerCase();
+      renderTOC(currentSearch);
 
       document.getElementById("theoryPage").innerHTML = `
-        <span class="level-badge ${lesson.badgeClass}" style="font-size:0.95rem;">LVL ${lesson.globalLevel} | ${lesson.levelStr}</span>
+        <span class="level-badge ${lesson.badgeClass}">LVL ${lesson.globalLevel} | ${lesson.levelStr}</span>
         <h2>${lesson.title}</h2>
         <p>${lesson.theory}</p>
         <p><strong>Misi Anda:</strong><br>${lesson.mission}</p>
@@ -753,7 +840,7 @@
         if (isResultCorrect && isFormulaStrict) {
           showFeedback(feedback, title, msg, 'success', "EKSEKUSI SEMPURNA", `Kombinasi Rumus <strong>${result}</strong> tervalidasi mutlak.`);
           
-          saveProgress(lesson.globalLevel); // SIMPAN KE LOCAL STORAGE
+          saveProgress(lesson.globalLevel); 
           
           if (currentIndex < curriculumMeta.length - 1) {
             btnNext.style.display = "block";
@@ -799,14 +886,13 @@
     window.onload = () => {
       generateMetadataOnly();
       renderTOC(); 
-      // Jika pengguna baru, load level 1. Jika punya save data, auto-resume atau biarkan mereka klik tombol.
       if (highestAchievedLevel > 1) {
           resumeJourney();
       } else {
           loadLesson();
       }
-      gsap.from(".sidebar", { x: -30, opacity: 0, duration: 0.6 });
-      gsap.from(".book-container", { opacity: 0, duration: 0.8 });
+      gsap.from(".top-bar", { y: -60, opacity: 0, duration: 0.6 });
+      gsap.from(".book-container", { opacity: 0, duration: 0.8, delay: 0.2 });
     };
   </script>
 </body>
