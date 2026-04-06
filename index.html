@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Excel Omniverse: 5000 Titan Engine</title>
+  <title>Excel Omniverse: Live Engine</title>
   
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/hyperformula/dist/hyperformula.full.min.js"></script>
@@ -19,6 +19,7 @@
       --text-main: #0F172A; --text-muted: #334155; --accent: #0284C7; 
       --input-bg: rgba(255, 255, 255, 0.7); --table-header: rgba(203, 213, 225, 0.85);
       --danger: #DC2626; --success: #059669; --info: #0284C7; --overlay-bg: rgba(255, 255, 255, 0.3);
+      --highlight-color: rgba(2, 132, 199, 0.25); --highlight-border: #0284C7;
     }
 
     [data-theme="dark"] {
@@ -28,6 +29,7 @@
       --text-main: #FDF8F5; --text-muted: #D7CCC8; --accent: #D4AF37; 
       --input-bg: rgba(15, 10, 8, 0.8); --table-header: rgba(40, 25, 20, 0.95);
       --danger: #EF4444; --success: #10B981; --info: #FBBF24; --overlay-bg: rgba(0, 0, 0, 0.6);
+      --highlight-color: rgba(212, 175, 55, 0.25); --highlight-border: #D4AF37;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; transition: background-color 0.4s ease, color 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease; }
@@ -44,7 +46,7 @@
     .top-level-indicator { font-weight: 800; font-size: 1rem; color: var(--accent); letter-spacing: 1px;}
 
     .app-wrapper { margin-top: 60px; width: 100%; display: flex; justify-content: center; padding: 1.5rem; }
-    .book-container { width: 100%; max-width: 1200px; display: flex; flex-direction: column; gap: 2rem; padding: 2rem; border-radius: 20px;}
+    .book-container { width: 98vw; max-width: 100%; display: flex; flex-direction: column; gap: 2rem; padding: 2rem; border-radius: 20px;}
 
     .sidebar { position: fixed; top: 0; left: 0; height: 100vh; width: 350px; display: flex; flex-direction: column; padding: 1.5rem; z-index: 100; transform: translateX(-100%); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); border-radius: 0; border-top: none; border-left: none; border-bottom: none;}
     .sidebar.open { transform: translateX(0); }
@@ -67,7 +69,6 @@
 
     .theme-toggle { background: var(--input-bg); border: 1px solid var(--glass-border); color: var(--text-main); padding: 0.75rem; border-radius: 8px; cursor: pointer; font-weight: 600; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 1rem; width: 100%;}
     
-    /* UX FIX: SEARCH INPUT DENGAN TOMBOL CARI/ENTER MUTLAK */
     .search-container { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; }
     .search-box { flex: 1; padding: 0.85rem 1rem; background: var(--input-bg); border: 1px solid var(--glass-border); border-radius: 8px; color: var(--text-main); outline: none; box-shadow: inset 0 2px 4px rgba(0,0,0,0.2); font-size: 1rem; min-width: 0;}
     .search-box:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(212,175,55,0.2); }
@@ -80,7 +81,6 @@
     .toc-item:hover { background: var(--input-bg); border-color: var(--glass-border); }
     .toc-item.active { border-left: 4px solid var(--accent); background: var(--input-bg); font-weight: 600; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
     
-    /* UX FIX: RUANG NAPAS JUDUL & BADGE */
     .level-badge { font-size: 0.75rem; padding: 0.35rem 0.75rem; border-radius: 6px; width: fit-content; margin-bottom: 1rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; display: inline-block;}
     .lvl-pemula { background: rgba(16, 185, 129, 0.15); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.4); }
     .lvl-menengah { background: rgba(2, 132, 199, 0.15); color: var(--info); border: 1px solid rgba(2, 132, 199, 0.4); }
@@ -97,7 +97,7 @@
 
     .table-wrapper { background: var(--input-bg); border-radius: 8px; border: 1px solid var(--glass-border); overflow-x: auto; overflow-y: visible; width: 100%; box-shadow: 0 8px 32px rgba(0,0,0,0.15); margin-bottom: 2rem;}
     table { width: max-content; min-width: 100%; border-collapse: separate; border-spacing: 0; font-size: 0.95rem; }
-    th, td { border: 1px solid var(--glass-border); padding: 0.85rem 1rem; text-align: left; white-space: nowrap; }
+    th, td { border: 1px solid var(--glass-border); padding: 0.6rem 0.8rem; text-align: left; white-space: nowrap; }
     
     th { background: var(--table-header); color: var(--text-main); font-weight: 700; text-align: center; position: sticky; top: 0; z-index: 3; backdrop-filter: blur(10px);}
     .row-num { background: var(--table-header); width: 40px; text-align: center; color: var(--text-muted); font-weight: 600; position: sticky; left: 0; z-index: 4; }
@@ -107,6 +107,9 @@
     [data-theme="light"] td:nth-child(2) { background: rgba(240, 244, 248, 0.98); }
     th:nth-child(2) { z-index: 5; }
 
+    /* UX FIX: LIVE HIGHLIGHTING KELAS CSS */
+    .highlight-cell { background-color: var(--highlight-color) !important; outline: 2px solid var(--highlight-border); outline-offset: -2px; transition: none; }
+
     td[contenteditable="true"] { outline: none; }
     td[contenteditable="true"]:focus { background: rgba(212, 175, 55, 0.15); box-shadow: inset 0 0 0 2px var(--accent); }
 
@@ -114,27 +117,34 @@
     textarea.auto-expand { width: 100%; padding: 1.25rem; border-radius: 8px; border: 1px solid var(--glass-border); background: var(--input-bg); color: var(--text-main); font-family: monospace; font-size: 1.1rem; outline: none; resize: none; overflow: hidden; min-height: 60px; line-height: 1.5; box-shadow: 0 10px 30px rgba(0,0,0,0.5); backdrop-filter: blur(10px);}
     textarea.auto-expand:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(212,175,55,0.25), 0 10px 30px rgba(0,0,0,0.5); }
     
+    /* UX FIX: BUTTON SYMMETRY & OPACITY */
     .button-group { display: flex; gap: 1rem; }
-    .btn-test { flex: 2; background: var(--accent); color: #000; border: none; padding: 1.25rem; border-radius: 8px; font-weight: 800; font-size: 1.1rem; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 4px 15px rgba(212, 175, 55, 0.2);}
+    
+    .btn-test { flex: 1; background: var(--accent); color: #000; border: none; padding: 1.25rem; border-radius: 8px; font-weight: 800; font-size: 1.1rem; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 4px 15px rgba(212, 175, 55, 0.2);}
     [data-theme="light"] .btn-test { color: #fff; }
-    .btn-giveup { flex: 1; background: var(--input-bg); color: var(--text-main); border: 1px solid var(--glass-border); padding: 1.25rem; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.2s;}
     .btn-test:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(212, 175, 55, 0.4); }
-    .btn-giveup:hover { border-color: var(--accent); }
+    
+    .btn-giveup { flex: 1; background: rgba(100, 116, 139, 0.4); color: var(--text-main); border: 1px solid var(--glass-border); padding: 1.25rem; border-radius: 8px; font-weight: 700; font-size: 1.1rem; cursor: pointer; transition: all 0.2s;}
+    [data-theme="light"] .btn-giveup { background: rgba(148, 163, 184, 0.5); }
+    .btn-giveup:hover { border-color: var(--accent); background: rgba(100, 116, 139, 0.6); }
 
     .btn-next { background: var(--success); color: white; border: none; padding: 1.25rem; border-radius: 8px; font-weight: 800; font-size: 1.1rem; cursor: pointer; width: 100%; display: none; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3); }
     .btn-next:hover { transform: translateY(-2px); }
     
-    .feedback { padding: 1.5rem; border-radius: 8px; display: none; line-height: 1.6; font-size: 1.05rem; box-shadow: 0 8px 24px rgba(0,0,0,0.15);}
-    .feedback.success { background: rgba(16, 185, 129, 0.2); border: 1px solid var(--success); color: var(--success); }
-    .feedback.error { background: rgba(220, 38, 38, 0.2); border: 1px solid var(--danger); color: var(--danger); }
-    .feedback.info { background: rgba(2, 132, 199, 0.2); border: 1px solid var(--info); color: var(--info); }
+    .feedback { padding: 1.5rem; border-radius: 8px; display: none; line-height: 1.7; font-size: 1.05rem; box-shadow: 0 8px 24px rgba(0,0,0,0.15);}
+    .feedback.success { background: rgba(16, 185, 129, 0.15); border: 1px solid var(--success); color: var(--success); }
+    .feedback.error { background: rgba(220, 38, 38, 0.15); border: 1px solid var(--danger); color: var(--danger); }
+    .feedback.info { background: rgba(2, 132, 199, 0.15); border: 1px solid var(--info); color: var(--info); }
     .feedback strong { display: block; margin-bottom: 0.5rem; font-size: 1.2rem; }
+    .feedback .explanation-block { margin-top: 1rem; padding-top: 1rem; border-top: 1px dashed currentColor; font-size: 0.95rem; opacity: 0.9;}
 
     @media (max-width: 768px) { 
         .app-wrapper { padding: 1rem; margin-top: 60px;} 
         .book-container { padding: 1rem; } 
+        .sidebar { width: 320px; }
+    }
+    @media (max-width: 480px) {
         .button-group { flex-direction: column; } 
-        .sidebar { width: 300px; }
     }
   </style>
 </head>
@@ -178,7 +188,7 @@
 
   <script>
     // ==========================================
-    // 1. JIT METADATA GENERATOR (5000 LEVEL)
+    // 1. JIT METADATA GENERATOR
     // ==========================================
     let curriculumMeta = [];
     let currentIndex = 0;
@@ -216,6 +226,14 @@
             index = (index - temp - 1) / 26;
         }
         return letter;
+    }
+
+    function colLetterToNumber(letter) {
+        let col = 0;
+        for (let i = 0; i < letter.length; i++) {
+            col = col * 26 + (letter.charCodeAt(i) - 64);
+        }
+        return col;
     }
 
     function generateMetadataOnly() {
@@ -291,10 +309,10 @@
           if(fn === 'MAX') targetValue = Math.max(...valsTarget);
           if(fn === 'MIN') targetValue = Math.min(...valsTarget);
           
-          theory = `Kurva kesulitan spasial aktif. Baris perlahan bertambah seiring level.`;
-          mission = `Gunakan ${fn} pada **Kolom ${targetColLetter}** dari baris 1 hingga ${rows}.`;
+          theory = `Pengenalan Ekstrem. Data tumbuh massif ke bawah dan ke samping.`;
+          mission = `Gunakan ${fn} HANYA untuk kolom bernama **Target (Kolom ${targetColLetter})** dari baris 1 hingga ${rows}.`;
           strictFormula = `=${fn}(${targetColLetter}1:${targetColLetter}${rows})`;
-          explanation = `Sintaks absolut: =${fn}(${targetColLetter}1:${targetColLetter}${rows}).`;
+          explanation = `Kolom ${targetColLetter} adalah satu-satunya kolom yang berisi data relevan (Target). Fungsi ${fn} akan memproses seluruh angka dari baris 1 hingga ${rows} secara berurutan.`;
       } 
       else if (meta.type === "LOGIC_TEXT") {
           let isLogic = scale % 2 === 0;
@@ -321,7 +339,7 @@
               theory = `IF di lautan matriks.`;
               mission = `Evaluasi sel **${targetColLetter}1**. Jika >= ${threshold}, cetak "APPROVE", jika tidak, "REJECT".`;
               strictFormula = `=IF(${targetColLetter}1>=${threshold},"APPROVE","REJECT")`;
-              explanation = `=IF(${targetColLetter}1>=${threshold},"APPROVE","REJECT")`;
+              explanation = `Struktur IF membutuhkan 3 argumen: Kondisi, Output True ("APPROVE"), dan Output False ("REJECT"). Logika terfokus pada Baris 1.`;
           } else {
               let numChars = 4 + (scale % 4);
               let rawCode = `INV${Math.floor(Math.random()*9000)}-XYZ`;
@@ -337,7 +355,7 @@
               theory = `Ekstraksi Karakter Mentah.`;
               mission = `Ekstrak ${numChars} karakter PERTAMA dari teks di sel **${targetColLetter}1**.`;
               strictFormula = `=LEFT(${targetColLetter}1,${numChars})`;
-              explanation = `=LEFT(${targetColLetter}1,${numChars})`;
+              explanation = `Fungsi LEFT membaca string dari ujung kiri dan mengekstrak tepat ${numChars} karakter. Berguna untuk menghilangkan suffix.`;
           }
       }
       else if (meta.type === "LOOKUP_SUMIF") {
@@ -362,10 +380,10 @@
                   }
                   dataMatrix.push(row);
               }
-              theory = `Pencarian Dimensi Lebar. Gunakan 0 sebagai paramater FALSE.`;
+              theory = `Pencarian Dimensi Lebar. Ketik kata FALSE atau angka 0 sebagai parameter terakhir.`;
               mission = `Tarik Harga dari **Kolom ${getColLetter(targetColIndex)}** untuk ID '${targetId}'. Tabel referensi membentang A1 hingga ${colLetter}${rows}.`;
-              strictFormula = `=VLOOKUP("${targetId}",A1:${colLetter}${rows},${targetColIndex},0)`;
-              explanation = `Gunakan parameter 0 untuk exact match. Index = ${targetColIndex}.`;
+              strictFormula = `=VLOOKUP("${targetId}",A1:${colLetter}${rows},${targetColIndex},FALSE)`;
+              explanation = `VLOOKUP menuntut Anda menghitung kolom manual. Jarak antara Kolom A ke Kolom ${getColLetter(targetColIndex)} adalah ${targetColIndex}. Parameter FALSE atau 0 wajib digunakan untuk Exact Match.`;
           } else {
               let critColIndex = 2 + (scale % 4); 
               let valColIndex = critColIndex + 2 + (scale % 5);
@@ -399,7 +417,7 @@
               theory = `SUMIF Terbelah Jauh.`;
               mission = `Jumlahkan Nilai di **Kolom ${vLtr}** KHUSUS untuk Region '${regTarget}' di **Kolom ${cLtr}**. Baris 1-${rows}.`;
               strictFormula = `=SUMIF(${cLtr}1:${cLtr}${rows},"${regTarget}",${vLtr}1:${vLtr}${rows})`;
-              explanation = `=SUMIF(${cLtr}1:${cLtr}${rows},"${regTarget}",${vLtr}1:${vLtr}${rows})`;
+              explanation = `Fungsi SUMIF mensyaratkan (Rentang_Kriteria, "Kriteria", Rentang_Penjumlahan). Anda menggunakan ${cLtr} sebagai pemicu dan ${vLtr} sebagai angka hitungan.`;
           }
       }
       else if (meta.type === "INDEX_MATCH_SUMIFS") { 
@@ -434,10 +452,10 @@
                   }
                   dataMatrix.push(row);
               }
-              theory = `INDEX MATCH Absolut. VLOOKUP telah lumpuh.`;
+              theory = `INDEX MATCH Absolut. VLOOKUP telah lumpuh karena data kunci di kanan.`;
               mission = `Tarik Hasil (Kolom ${vLtr}) berdasarkan Kode '${targetCode}' yang berada di Kolom ${kLtr}. Baris 1-${rows}.`;
               strictFormula = `=INDEX(${vLtr}1:${vLtr}${rows},MATCH("${targetCode}",${kLtr}1:${kLtr}${rows},0))`;
-              explanation = `MATCH di ${kLtr}, INDEX di ${vLtr}.`;
+              explanation = `MATCH mencari di baris mana kode berada pada rentang ${kLtr}. INDEX kemudian turun ke baris tersebut pada kolom ${vLtr} dan menarik nilainya secara paksa tanpa mempedulikan posisi kiri/kanan.`;
           } else { 
               let crit1Col = 2 + (scale%3);
               let crit2Col = crit1Col + 2 + (scale%4);
@@ -477,7 +495,7 @@
               theory = `SUMIFS Matriks Acak.`;
               mission = `Jumlahkan Nilai (Kolom ${vLtr}) JIKA Reg '${rTgt}' (Kolom ${c1Ltr}) DAN Stat '${sTgt}' (Kolom ${c2Ltr}). Baris 1-${rows}.`;
               strictFormula = `=SUMIFS(${vLtr}1:${vLtr}${rows},${c1Ltr}1:${c1Ltr}${rows},"${rTgt}",${c2Ltr}1:${c2Ltr}${rows},"${sTgt}")`;
-              explanation = `Rentang nilai ditaruh di parameter AWAL.`;
+              explanation = `SUMIFS mensyaratkan rentang angka yang dihitung (${vLtr}) diletakkan di parameter paling awal. Setelah itu, barulah Anda merangkai syarat logika secara berpasangan.`;
           }
       }
       else if (meta.type === "GOD_TIER_NESTED") {
@@ -512,7 +530,7 @@
               theory = `2D INDEX MATCH. Dua fungsi MATCH di dalam satu INDEX.`;
               mission = `Tarik Harga untuk Produk '${targetRowId}' pada bulan '${targetMonth}'. Matriks data: B2:${colLetter}${rows}. Baris produk di A2:A${rows}. Kolom bulan di B1:${colLetter}1.`;
               strictFormula = `=INDEX(B2:${colLetter}${rows},MATCH("${targetRowId}",A2:A${rows},0),MATCH("${targetMonth}",B1:${colLetter}1,0))`;
-              explanation = `INDEX(matriks, baris_match, kolom_match).`;
+              explanation = `Teknik pemetaan silang. MATCH pertama mencari secara vertikal di Kolom A. MATCH kedua mencari secara horizontal di Baris 1. INDEX memadukan keduanya bak koordinat X dan Y pada peta.`;
           } else if (mode === 1) {
               let kpiThresh = 90; let absThresh = 95;
               headers = ["A (Nama)", "B (KPI)", "C (Absen)", "D (Gaji Base)", "E (Decoy)"];
@@ -532,7 +550,7 @@
               theory = `NESTED IF(AND). Gerbang logika kembar.`;
               mission = `Evaluasi Baris 1: JIKA KPI (Sel B1) >= ${kpiThresh} DAN Absen (Sel C1) >= ${absThresh}, MAKA kalikan Gaji Base (Sel D1) dengan 1.5. Jika salah satu gagal, beri nilai 0.`;
               strictFormula = `=IF(AND(B1>=${kpiThresh},C1>=${absThresh}),D1*1.5,0)`;
-              explanation = `AND memaksa kedua kondisi harus TRUE.`;
+              explanation = `Fungsi AND() memaksa kedua kondisi harus TRUE agar IF menjalankan instruksi 'D1*1.5'. Jika satu syarat gagal, sistem melompat ke FALSE (0).`;
           } else {
               let targetId = `ID-999`; 
               let colLetter = getColLetter(totalCols);
@@ -548,13 +566,13 @@
 
               targetValue = "REJECT";
               theory = `Matriks Bertameng. IFERROR dalam satu baris.`;
-              mission = `Gunakan VLOOKUP untuk mencari Harga (Kolom B) dari ID '${targetId}'. Kalikan hasil tersebut dengan 1.11 (Pajak). Karena ID fiktif, bungkus dengan IFERROR agar mencetak "REJECT" (tanpa kutip di dalam rumus).`;
+              mission = `Gunakan VLOOKUP untuk mencari Harga (Kolom B) dari ID '${targetId}'. Kalikan hasil tersebut dengan 1.11 (Pajak). Karena ID fiktif, bungkus dengan IFERROR agar mencetak "REJECT".`;
               strictFormula = `=IFERROR(VLOOKUP("${targetId}",A1:${colLetter}${rows},2,0)*1.11,"REJECT")`;
-              explanation = `VLOOKUP gagal memicu IFERROR.`;
+              explanation = `Excel menghitung VLOOKUP*1.11 terlebih dahulu. Jika pencarian gagal, VLOOKUP memuntahkan #N/A. IFERROR mencegat crash tersebut dan menggantinya dengan 'REJECT'.`;
           }
       }
       else { 
-          // TIER 6: TITAN COMPLEX (FINANCIAL DASHBOARD MODELING)
+          // TIER 6: TITAN COMPLEX
           rows = Math.min(30 + Math.floor(scale / 10), 300); 
           totalCols = Math.min(10 + Math.floor(scale / 25), 26);
           let colLtr = getColLetter(totalCols);
@@ -587,10 +605,10 @@
           if(isEmpExist) targetValue = empGaji * totalTunjanganIT;
           else targetValue = 0;
 
-          theory = `TITAN CLASS: Financial Modeling. Rumus ini menyiksa memori Anda. Kombinasi 3 logika korporat dalam satu baris.`;
+          theory = `TITAN CLASS: Financial Modeling. Kombinasi 3 logika korporat dalam satu baris.`;
           mission = `Cari Gaji (Kolom B) karyawan '${targetEmp}' dengan VLOOKUP. KALIKAN hasil tersebut dengan Total Tunjangan (Kolom D) khusus Dept '${deptMatch}' (Kolom C) menggunakan SUMIF. JIKA VLOOKUP gagal (karyawan resign), bungkus semuanya dengan IFERROR untuk memuntahkan angka 0. Tabel A1:${colLtr}${rows}.`;
-          strictFormula = `=IFERROR(VLOOKUP("${targetEmp}",A1:${colLtr}${rows},2,0)*SUMIF(C1:C${rows},"${deptMatch}",D1:D${rows}),0)`;
-          explanation = `Matematika Dieksekusi pertama. Jika VLOOKUP gagal, seluruh perhitungan di dalam IFERROR akan gagal dan mengembalikan angka 0 mutlak.`;
+          strictFormula = `=IFERROR(VLOOKUP("${targetEmp}",A1:${colLtr}${rows},2,FALSE)*SUMIF(C1:C${rows},"${deptMatch}",D1:D${rows}),0)`;
+          explanation = `VLOOKUP mencari komponen statis (Gaji), SUMIF merangkum komponen dinamis agregat (Total Tunjangan IT). Mereka dikalikan. Jika VLOOKUP tidak menemukan karyawan tersebut, rantai hitungan akan runtuh dan dicegat langsung oleh IFERROR yang mengembalikannya menjadi 0.`;
       }
 
       if(typeof targetValue === 'number') targetValue = Number(targetValue.toFixed(4));
@@ -603,27 +621,66 @@
     }
 
     // ==========================================
-    // 3. UI LOGIC (FILTER PISAH & PENGHANCURAN BATAS TIER)
+    // 3. UX HIGHLIGHTING ENGINE (Visual Feedback)
     // ==========================================
     function toggleTheme() {
       const body = document.documentElement;
       body.setAttribute("data-theme", body.getAttribute("data-theme") === "light" ? "dark" : "light");
     }
 
-    // Event oninput HANYA untuk live filtering daftar TOC
+    // Fungsi konversi huruf ke angka indeks DOM
+    function applyHighlighting() {
+        // Hapus highlight sebelumnya
+        document.querySelectorAll('.highlight-cell').forEach(td => td.classList.remove('highlight-cell'));
+
+        const formulaRaw = document.getElementById('formulaInput').value.toUpperCase();
+        if(!formulaRaw.startsWith('=')) return;
+
+        // Regex canggih pencari koordinat A1 atau A1:B5
+        const regex = /([A-Z]+)(\d+)(?::([A-Z]+)(\d+))?/g;
+        let match;
+        const tableRows = document.querySelectorAll('#sandboxBody tr');
+
+        while ((match = regex.exec(formulaRaw)) !== null) {
+            let startCol = colLetterToNumber(match[1]);
+            let startRow = parseInt(match[2]);
+            let endCol = match[3] ? colLetterToNumber(match[3]) : startCol;
+            let endRow = match[4] ? parseInt(match[4]) : startRow;
+
+            let minCol = Math.min(startCol, endCol);
+            let maxCol = Math.max(startCol, endCol);
+            let minRow = Math.min(startRow, endRow);
+            let maxRow = Math.max(startRow, endRow);
+
+            // Eksekusi Injeksi CSS ke tabel DOM
+            for(let r = minRow; r <= maxRow; r++) {
+                if(r - 1 >= 0 && r - 1 < tableRows.length) {
+                    const cells = tableRows[r - 1].querySelectorAll('td');
+                    for(let c = minCol; c <= maxCol; c++) {
+                        // Di DOM, index c=1 adalah Kolom A (karena c=0 adalah nomor baris)
+                        if(cells[c]) {
+                            cells[c].classList.add('highlight-cell');
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // ==========================================
+    // 4. UI LOGIC (PENCARIAN & NAVIGASI)
+    // ==========================================
     function handleTyping(e) {
       const query = e.target.value.trim().toLowerCase();
       renderTOC(query);
     }
 
-    // Eksekusi mutlak via Enter
     function handleEnterKey(e) {
         if (e.key === 'Enter') {
             executeExactSearch();
         }
     }
 
-    // Eksekusi mutlak via Tombol atau Enter
     function executeExactSearch() {
         const query = document.getElementById("searchInput").value.trim().toLowerCase();
         if (!query) return;
@@ -650,7 +707,6 @@
       let filtered = [];
       const isNumber = /^\d+$/.test(query);
 
-      // FIX UX: Hancurkan Batas Tier. Ambil sisa level murni secara linear.
       if (isNumber && query !== "") {
           const targetLvl = parseInt(query);
           filtered = curriculumMeta.filter(c => c.globalLevel >= targetLvl);
@@ -662,7 +718,6 @@
           );
       }
       
-      // Limit 100 DOM Nodes agar tidak lag
       const renderLimit = filtered.slice(0, 100); 
 
       renderLimit.forEach((item) => {
@@ -741,6 +796,7 @@
       textarea.addEventListener("input", function() {
         this.style.height = "auto";
         this.style.height = (this.scrollHeight) + "px";
+        applyHighlighting(); // <-- MEMICU VISUAL HIGHLIGHTING SECARA REAL-TIME
       });
 
       gsap.fromTo("#theoryPage, #practicePage", { opacity: 0, y: 15 }, { opacity: 1, y: 0, duration: 0.4, stagger: 0.1 });
@@ -762,7 +818,7 @@
     }
 
     // ==========================================
-    // 4. MESIN EVALUASI & LOCAL STORAGE
+    // 5. MESIN EVALUASI ABSOLUT & EDUKASI
     // ==========================================
     function saveProgress(level) {
         if (level > highestAchievedLevel) {
@@ -783,8 +839,9 @@
       input.value = lesson.strictFormula;
       input.style.height = "auto";
       input.style.height = (input.scrollHeight) + "px";
+      applyHighlighting(); // Highlight jawaban solusi
 
-      showFeedback(feedback, title, msg, 'info', "ANALISIS SOLUSI", `Kode Bypass: <code>${lesson.strictFormula}</code> <br><br><strong>Breakdown:</strong><br>${lesson.explanation}`);
+      showFeedback(feedback, title, msg, 'info', "ANALISIS SOLUSI", `Sintaks Produksi: <code>${lesson.strictFormula}</code> <div class="explanation-block"><strong>Breakdown Logika:</strong><br>${lesson.explanation}</div>`);
 
       if (currentIndex < curriculumMeta.length - 1) {
         btnNext.style.display = "block";
@@ -794,22 +851,24 @@
 
     function runTest() {
       const lesson = activeCompiledLesson;
-      let userFormula = document.getElementById("formulaInput").value;
+      let userFormulaRaw = document.getElementById("formulaInput").value;
       const feedback = document.getElementById("feedbackBox");
       const title = document.getElementById("feedTitle");
       const msg = document.getElementById("feedMsg");
       const btnNext = document.getElementById("btnNext");
 
-      if (!userFormula.trim()) return;
+      if (!userFormulaRaw.trim()) return;
       
-      userFormula = userFormula.replace(/[\r\n\t]/g, '').replace(/[“”〝〞〟＂«»„‟]/g, '"').replace(/['‘’‛]{2}/g, '"').replace(/;/g, ',').replace(/[\u200B-\u200D\uFEFF\u00A0]/g, '').replace(/FALSE/gi, '0').trim();
+      let userFormula = userFormulaRaw.replace(/[\r\n\t]/g, '').replace(/[“”〝〞〟＂«»„‟]/g, '"').replace(/['‘’‛]{2}/g, '"').replace(/;/g, ',').replace(/[\u200B-\u200D\uFEFF\u00A0]/g, '').trim();
 
       if (!userFormula.startsWith("=")) {
         showFeedback(feedback, title, msg, 'error', "FATAL SINTAKS", "Operator komputasi wajib diawali '='."); return;
       }
 
-      const cleanUserFormula = userFormula.toUpperCase().replace(/\s/g, '');
-      const cleanStrictFormula = lesson.strictFormula.toUpperCase().replace(/\s/g, '');
+      let formulaForEngine = userFormula.replace(/FALSE/gi, '0');
+
+      const cleanUserFormula = userFormula.toUpperCase().replace(/\s/g, '').replace(/FALSE/g, '0');
+      const cleanStrictFormula = lesson.strictFormula.toUpperCase().replace(/\s/g, '').replace(/FALSE/g, '0');
       let activeSheetId;
 
       try {
@@ -818,7 +877,7 @@
         engine.setSheetContent(activeSheetId, getTableData());
 
         const evalCell = { sheet: activeSheetId, col: 100, row: 1000 };
-        engine.setCellContents(evalCell, [[userFormula]]);
+        engine.setCellContents(evalCell, [[formulaForEngine]]);
 
         const result = engine.getCellValue(evalCell);
         
@@ -838,7 +897,7 @@
         let isFormulaStrict = cleanUserFormula === cleanStrictFormula;
 
         if (isResultCorrect && isFormulaStrict) {
-          showFeedback(feedback, title, msg, 'success', "EKSEKUSI SEMPURNA", `Kombinasi Rumus <strong>${result}</strong> tervalidasi mutlak.`);
+          showFeedback(feedback, title, msg, 'success', "EKSEKUSI SEMPURNA", `Output perhitungan <strong>${result}</strong> presisi.<div class="explanation-block"><strong>Mengapa rumus ini valid?</strong><br>${lesson.explanation}</div>`);
           
           saveProgress(lesson.globalLevel); 
           
@@ -847,17 +906,17 @@
             gsap.fromTo(btnNext, {opacity: 0, y: 10}, {opacity: 1, y: 0, duration: 0.3});
           }
         } else if (isResultCorrect && !isFormulaStrict) {
-          showFeedback(feedback, title, msg, 'error', "TARGET TERCAPAI, LOGIKA DITOLAK", `Hasil benar, tetapi Anda tidak merangkai fungsi bersarang sesuai instruksi mutlak. Wajib: <code>${lesson.strictFormula}</code>`);
+          showFeedback(feedback, title, msg, 'error', "TARGET TERCAPAI, LOGIKA DITOLAK", `Anda mendapat output yang benar, namun struktur sintaks Anda dipertanyakan secara profesional. Wajib: <code>${lesson.strictFormula}</code><div class="explanation-block"><strong>Pemahaman Standar Korporat:</strong><br>${lesson.explanation}</div>`);
         } else {
-          showFeedback(feedback, title, msg, 'error', "KEGAGALAN ANALISIS", `Output Mesin: ${result}. Target Misi: ${lesson.targetValue}.`);
+          showFeedback(feedback, title, msg, 'error', "KEGAGALAN ANALISIS", `Output Mesin: ${result}. Target Misi: ${lesson.targetValue}.<div class="explanation-block"><strong>Petunjuk Audit Logika:</strong><br>Periksa kembali rentang matriks Anda yang disorot biru/emas di tabel. ${lesson.theory}</div>`);
         }
       } catch (err) {
         let eMsg = err.message;
-        if (eMsg.includes('#NAME?')) eMsg = "<strong>SYNTAX ERROR (#NAME?):</strong> Anda mengetik nama fungsi yang salah (typo) dalam sarang fungsi Anda.";
-        else if (eMsg.includes('#N/A')) eMsg = "Target data tidak ditemukan dalam Array. Anda mungkin lupa menggunakan IFERROR.";
-        else if (eMsg.includes('#VALUE!')) eMsg = "Tipe data berbenturan dalam salah satu cabang IF atau perhitungan Anda.";
-        else if (eMsg.includes('#REF!')) eMsg = "Referensi tabel keluar batas.";
-        else if (eMsg.includes('Parse error')) eMsg = "Pecah kompilasi. Anda melupakan kurung tutup atau kelebihan koma dalam fungsi bersarang.";
+        if (eMsg.includes('#NAME?')) eMsg = "<strong>SYNTAX ERROR (#NAME?):</strong> Anda salah mengeja nama fungsi (typo) dalam sarang fungsi Anda.";
+        else if (eMsg.includes('#N/A')) eMsg = "Target data tidak ditemukan dalam matriks Array. Ingat penggunaan fungsi tameng IFERROR jika ini level jebakan.";
+        else if (eMsg.includes('#VALUE!')) eMsg = "Tipe data berbenturan (misal membagi sel teks huruf dengan angka kalkulasi).";
+        else if (eMsg.includes('#REF!')) eMsg = "Referensi pemblokiran sel Anda keluar dari batas tabel riil.";
+        else if (eMsg.includes('Parse error')) eMsg = "Pecah kompilasi. Anda melupakan kurung tutup atau terjadi kelebihan koma penyekat.";
         
         showFeedback(feedback, title, msg, 'error', "INTERUPSI MESIN EXCEL", eMsg);
       } finally {
