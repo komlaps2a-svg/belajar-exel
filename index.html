@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Excel Omniverse: Live Engine</title>
+  <title>Excel Omniverse: Architectural Edu-Engine</title>
   
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/hyperformula/dist/hyperformula.full.min.js"></script>
@@ -20,6 +20,7 @@
       --input-bg: rgba(255, 255, 255, 0.7); --table-header: rgba(203, 213, 225, 0.85);
       --danger: #DC2626; --success: #059669; --info: #0284C7; --overlay-bg: rgba(255, 255, 255, 0.3);
       --highlight-color: rgba(2, 132, 199, 0.25); --highlight-border: #0284C7;
+      --cell-input: #EFF6FF; --cell-input-text: #1D4ED8;
     }
 
     [data-theme="dark"] {
@@ -30,6 +31,7 @@
       --input-bg: rgba(15, 10, 8, 0.8); --table-header: rgba(40, 25, 20, 0.95);
       --danger: #EF4444; --success: #10B981; --info: #FBBF24; --overlay-bg: rgba(0, 0, 0, 0.6);
       --highlight-color: rgba(212, 175, 55, 0.25); --highlight-border: #D4AF37;
+      --cell-input: #2A1A12; --cell-input-text: #FBBF24;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; transition: background-color 0.4s ease, color 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease; }
@@ -37,7 +39,7 @@
     ::-webkit-scrollbar-track { background: rgba(0,0,0,0.15); border-radius: 4px; }
     ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 4px; }
 
-    body { font-family: 'Inter', system-ui, sans-serif; color: var(--text-main); background: var(--bg-page); min-height: 100vh; overflow-x: hidden; margin: 0; padding: 0;}
+    body { font-family: 'Inter', system-ui, sans-serif; color: var(--text-main); background: var(--bg-page); min-height: 100vh; overflow-x: hidden; margin: 0; padding: 0; scroll-behavior: smooth;}
     .glass { background: var(--glass-bg); backdrop-filter: blur(32px); -webkit-backdrop-filter: blur(32px); border: 1px solid var(--glass-border); box-shadow: var(--glass-shadow); }
 
     .top-bar { position: fixed; top: 0; left: 0; width: 100%; height: 60px; display: flex; justify-content: space-between; align-items: center; padding: 0 1.5rem; z-index: 50; border-radius: 0; border-top: none; border-left: none; border-right: none;}
@@ -107,19 +109,23 @@
     [data-theme="light"] td:nth-child(2) { background: rgba(240, 244, 248, 0.98); }
     th:nth-child(2) { z-index: 5; }
 
-    /* UX FIX: LIVE HIGHLIGHTING KELAS CSS */
     .highlight-cell { background-color: var(--highlight-color) !important; outline: 2px solid var(--highlight-border); outline-offset: -2px; transition: none; }
 
     td[contenteditable="true"] { outline: none; }
     td[contenteditable="true"]:focus { background: rgba(212, 175, 55, 0.15); box-shadow: inset 0 0 0 2px var(--accent); }
+    
+    .empty-target { color: rgba(100,116,139,0.5); font-style: italic; }
+    .filled-target { color: var(--success); font-weight: 700; font-family: monospace;}
+    
+    .dashboard-input { background: var(--cell-input); color: var(--cell-input-text); font-weight: 800; border: 1px solid var(--accent); }
+    .dashboard-label { font-weight: 700; color: var(--accent); background: rgba(0,0,0,0.1); }
+    .dashboard-divider { border-bottom: 3px solid var(--accent) !important; }
 
     .test-zone { display: flex; flex-direction: column; gap: 1rem; position: sticky; bottom: 1rem; z-index: 10; margin-top: 1rem;}
     textarea.auto-expand { width: 100%; padding: 1.25rem; border-radius: 8px; border: 1px solid var(--glass-border); background: var(--input-bg); color: var(--text-main); font-family: monospace; font-size: 1.1rem; outline: none; resize: none; overflow: hidden; min-height: 60px; line-height: 1.5; box-shadow: 0 10px 30px rgba(0,0,0,0.5); backdrop-filter: blur(10px);}
     textarea.auto-expand:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(212,175,55,0.25), 0 10px 30px rgba(0,0,0,0.5); }
     
-    /* UX FIX: BUTTON SYMMETRY & OPACITY */
     .button-group { display: flex; gap: 1rem; }
-    
     .btn-test { flex: 1; background: var(--accent); color: #000; border: none; padding: 1.25rem; border-radius: 8px; font-weight: 800; font-size: 1.1rem; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 4px 15px rgba(212, 175, 55, 0.2);}
     [data-theme="light"] .btn-test { color: #fff; }
     .btn-test:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(212, 175, 55, 0.4); }
@@ -135,8 +141,18 @@
     .feedback.success { background: rgba(16, 185, 129, 0.15); border: 1px solid var(--success); color: var(--success); }
     .feedback.error { background: rgba(220, 38, 38, 0.15); border: 1px solid var(--danger); color: var(--danger); }
     .feedback.info { background: rgba(2, 132, 199, 0.15); border: 1px solid var(--info); color: var(--info); }
+    
+    .matrix-result-row { background: rgba(16, 185, 129, 0.15) !important; border-top: 2px solid var(--success); }
+    .matrix-result-label { text-align: right; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 2px; color: var(--text-main); padding-right: 1.5rem !important;}
+    .matrix-result-value { font-size: 1.8rem; font-weight: 900; color: var(--success); font-family: monospace; text-shadow: 0 0 15px rgba(16,185,129,0.3); letter-spacing: -1px;}
+    
     .feedback strong { display: block; margin-bottom: 0.5rem; font-size: 1.2rem; }
-    .feedback .explanation-block { margin-top: 1rem; padding-top: 1rem; border-top: 1px dashed currentColor; font-size: 0.95rem; opacity: 0.9;}
+    
+    /* UX FIX: ARCHITECTURAL EXPLANATION BLOCK */
+    .explanation-block { margin-top: 1rem; padding: 1rem; border-left: 4px solid currentColor; background: rgba(0,0,0,0.1); font-size: 0.95rem; border-radius: 0 8px 8px 0; }
+    .explanation-block h4 { margin-top: 0; margin-bottom: 0.5rem; font-size: 1rem; text-transform: uppercase; letter-spacing: 1px;}
+    .explanation-block ul { margin: 0.5rem 0; padding-left: 1.2rem; }
+    .explanation-block li { margin-bottom: 0.4rem; }
 
     @media (max-width: 768px) { 
         .app-wrapper { padding: 1rem; margin-top: 60px;} 
@@ -271,18 +287,19 @@
     }
 
     // ==========================================
-    // 2. JIT COMPILER
+    // 2. JIT COMPILER & ARCHITECTURAL EXPLANATIONS
     // ==========================================
     function compileLevelData(meta) {
       const scale = meta.scale; 
       let rows, totalCols, targetColIndex, targetColLetter;
       let headers = [], dataMatrix = [];
-      let strictFormula, targetValue, mission, theory, explanation;
+      let strictFormula, targetValue, mission, theory, explanation, calcMode;
 
       const DECOY_HEADERS = ["(Margin)", "(Pajak)", "(Batch)", "(Gudang)", "(Sisa)", "(Diskon)", "(Shift)", "(Bonus)"];
       const genDecoy = () => Math.floor(Math.random()*9999);
 
       if (meta.type === "AGGREGATION") {
+          calcMode = "DASHBOARD";
           let fns = ['SUM', 'AVERAGE', 'MAX', 'MIN'];
           let fn = fns[scale % 4];
           rows = Math.min(5 + Math.floor(scale / 10), 100); 
@@ -301,7 +318,7 @@
                 row.push(v);
                 if (c === targetColIndex) valsTarget.push(v);
             }
-            dataMatrix.push(row);
+            dataMatrix.push({type: 'data', cells: row});
           }
           
           if(fn === 'SUM') targetValue = valsTarget.reduce((a,b)=>a+b,0);
@@ -309,12 +326,20 @@
           if(fn === 'MAX') targetValue = Math.max(...valsTarget);
           if(fn === 'MIN') targetValue = Math.min(...valsTarget);
           
-          theory = `Pengenalan Ekstrem. Data tumbuh massif ke bawah dan ke samping.`;
-          mission = `Gunakan ${fn} HANYA untuk kolom bernama **Target (Kolom ${targetColLetter})** dari baris 1 hingga ${rows}.`;
-          strictFormula = `=${fn}(${targetColLetter}1:${targetColLetter}${rows})`;
-          explanation = `Kolom ${targetColLetter} adalah satu-satunya kolom yang berisi data relevan (Target). Fungsi ${fn} akan memproses seluruh angka dari baris 1 hingga ${rows} secara berurutan.`;
+          theory = `Mode Dashboard: Mencari 1 nilai agregat absolut dari lautan data ber-noise.`;
+          mission = `Gunakan ${fn} pada **Kolom ${targetColLetter}** dari baris 2 hingga ${rows+1}.`;
+          strictFormula = `=${fn}(${targetColLetter}2:${targetColLetter}${rows+1})`;
+          explanation = `
+            <h4>Bedah Arsitektur Agregasi</h4>
+            <ul>
+                <li><strong>Mekanisme Inti:</strong> Fungsi <code>${fn}</code> membaca data sebagai 1D Array (vektor tunggal). Mesin akan mengabaikan tipe data string (huruf) dan hanya memproses integer/float.</li>
+                <li><strong>Eksekusi Arsitektural:</strong> Rentang <code>${targetColLetter}2:${targetColLetter}${rows+1}</code> mengunci eksekusi murni pada kolom target. Mengapa mulai dari baris 2? Karena baris 1 direservasi secara global untuk Header tabel basis data.</li>
+                <li><strong>Keterhubungan (Impact):</strong> Memblok seluruh tabel (misal: A:Z) akan memicu pencemaran data (Data Corruption) karena kolom Decoy akan ikut dikalkulasi. Presisi spasial adalah segalanya.</li>
+            </ul>
+          `;
       } 
       else if (meta.type === "LOGIC_TEXT") {
+          calcMode = "MASS_FILL"; 
           let isLogic = scale % 2 === 0;
           rows = Math.min(5 + Math.floor(scale / 15), 120); 
           totalCols = Math.min(4 + Math.floor(scale / 40), 18);
@@ -322,40 +347,64 @@
           targetColLetter = getColLetter(targetColIndex);
 
           headers = ["A (ID)"];
-          for(let c=2; c<=totalCols; c++) headers.push(c === targetColIndex ? `${getColLetter(c)} (Data Uji)` : `${getColLetter(c)} (X)`);
+          for(let c=2; c<=totalCols; c++) headers.push(c === targetColIndex ? `${getColLetter(c)} (Target)` : `${getColLetter(c)} (X)`);
 
+          let targetArray = [];
           if(isLogic) {
               let threshold = 500 + Math.floor(Math.random() * 300);
-              let score = Math.floor(Math.random() * 500) + 400;
-              targetValue = score >= threshold ? "APPROVE" : "REJECT";
+              
               for(let r=1; r<=rows; r++) {
                   let row = [`K-${r}`];
+                  let score = Math.floor(Math.random() * 500) + 400;
                   for(let c=2; c<=totalCols; c++) {
-                      if (c === targetColIndex) row.push(r === 1 ? score : Math.floor(Math.random() * 1000));
+                      if (c === targetColIndex) {
+                          row.push("?"); 
+                          targetArray.push(score >= threshold ? "APPROVE" : "REJECT");
+                      }
+                      else if (c === 2) row.push(score); 
                       else row.push(genDecoy());
                   }
-                  dataMatrix.push(row);
+                  dataMatrix.push({type: 'data', cells: row});
               }
-              theory = `IF di lautan matriks.`;
-              mission = `Evaluasi sel **${targetColLetter}1**. Jika >= ${threshold}, cetak "APPROVE", jika tidak, "REJECT".`;
-              strictFormula = `=IF(${targetColLetter}1>=${threshold},"APPROVE","REJECT")`;
-              explanation = `Struktur IF membutuhkan 3 argumen: Kondisi, Output True ("APPROVE"), dan Output False ("REJECT"). Logika terfokus pada Baris 1.`;
+              theory = `Mode Mass-Fill: Mengisi ribuan baris dengan auto-propagasi.`;
+              mission = `Tulis rumus untuk **Baris 2** di **Kolom ${targetColLetter}**. Jika Skor (Kolom B) >= ${threshold}, cetak "APPROVE", jika tidak, "REJECT". Mesin otomatis memproses baris ke bawah.`;
+              strictFormula = `=IF(B2>=${threshold},"APPROVE","REJECT")`;
+              explanation = `
+                <h4>Bedah Gerbang Logika Relatif</h4>
+                <ul>
+                    <li><strong>Mekanisme Inti:</strong> <code>IF</code> beroperasi sebagai percabangan biner murni. Evaluasi <code>B2>=${threshold}</code> akan memuntahkan TRUE atau FALSE di level memori sebelum memilih argumen output.</li>
+                    <li><strong>Eksekusi Arsitektural:</strong> Anda sengaja TIDAK menggunakan tanda dolar (<code>$B$2</code>). Referensi sel <code>B2</code> bersifat relatif, memungkinkan mesin komputasi untuk melakukan <em>dynamic auto-fill</em> secara bergeser ke bawah (B3, B4, B5) secara otonom.</li>
+                    <li><strong>Keterhubungan (Impact):</strong> Ini adalah standar utama Data Enrichment. Satu rumus cerdas di baris teratas dapat membersihkan atau mengkategorikan jutaan baris data mentah secara instan tanpa iterasi manual.</li>
+                </ul>
+              `;
+              targetValue = targetArray;
           } else {
               let numChars = 4 + (scale % 4);
-              let rawCode = `INV${Math.floor(Math.random()*9000)}-XYZ`;
-              targetValue = rawCode.substring(0, numChars); 
               for(let r=1; r<=rows; r++) {
                   let row = [`K-${r}`];
+                  let rawCode = `INV${Math.floor(Math.random()*9000)}-XYZ`;
                   for(let c=2; c<=totalCols; c++) {
-                      if (c === targetColIndex) row.push(r === 1 ? rawCode : `INV${Math.floor(Math.random()*9000)}`);
+                      if (c === targetColIndex) {
+                          row.push("?");
+                          targetArray.push(rawCode.substring(0, numChars));
+                      }
+                      else if (c === 2) row.push(rawCode); 
                       else row.push(genDecoy());
                   }
-                  dataMatrix.push(row);
+                  dataMatrix.push({type: 'data', cells: row});
               }
-              theory = `Ekstraksi Karakter Mentah.`;
-              mission = `Ekstrak ${numChars} karakter PERTAMA dari teks di sel **${targetColLetter}1**.`;
-              strictFormula = `=LEFT(${targetColLetter}1,${numChars})`;
-              explanation = `Fungsi LEFT membaca string dari ujung kiri dan mengekstrak tepat ${numChars} karakter. Berguna untuk menghilangkan suffix.`;
+              theory = `Mode Mass-Fill: String Slicing (Pembersihan Data).`;
+              mission = `Ekstrak ${numChars} karakter PERTAMA dari teks di **Kolom B**. Tulis rumus hanya untuk **Baris 2**.`;
+              strictFormula = `=LEFT(B2,${numChars})`;
+              explanation = `
+                <h4>Bedah Ekstraksi String</h4>
+                <ul>
+                    <li><strong>Mekanisme Inti:</strong> <code>LEFT</code> berinteraksi langsung dengan tipe data String. Ia membaca indeks memori string dari byte ke-0 (paling kiri) dan memotong sebanyak <code>${numChars}</code> karakter persis.</li>
+                    <li><strong>Eksekusi Arsitektural:</strong> Referensi <code>B2</code> memungkinkan vektor array terpropagasi ke seluruh baris di bawahnya tanpa mematahkan ikatan relasional dengan baris data utamanya.</li>
+                    <li><strong>Keterhubungan (Impact):</strong> Di ranah ETL (Extract, Transform, Load), fungsi pemotongan teks ini mutlak diperlukan untuk menghilangkan suffix sampah (seperti '-XYZ') sebelum data dikirim ke SQL Database.</li>
+                </ul>
+              `;
+              targetValue = targetArray;
           }
       }
       else if (meta.type === "LOOKUP_SUMIF") {
@@ -364,27 +413,58 @@
           totalCols = Math.min(6 + Math.floor(scale / 25), 26); 
 
           if(isLookup) {
-              targetColIndex = 3 + (scale % (totalCols - 2)); 
-              let targetId = `SKU-10${Math.floor(Math.random() * (rows/2)) + 1}`; 
-              let colLetter = getColLetter(totalCols);
-              headers = ["A (ID)", "B (Item)"];
-              for(let c=3; c<=totalCols; c++) headers.push(c === targetColIndex ? `${getColLetter(c)} (Harga)` : `${getColLetter(c)} (Decoy)`);
+              calcMode = "MASS_FILL";
+              targetColIndex = 4 + (scale % (totalCols - 3)); 
+              let refTableStartCol = 6; 
+              totalCols = Math.max(totalCols, refTableStartCol + 2);
+              
+              let colLetterRef = getColLetter(totalCols);
+              headers = ["A (Cari ID)"];
+              for(let c=2; c<=totalCols; c++) {
+                  if(c === targetColIndex) headers.push(`${getColLetter(c)} (Isi Sini)`);
+                  else if(c === refTableStartCol) headers.push(`${getColLetter(c)} (Ref SKU)`);
+                  else if(c === refTableStartCol+1) headers.push(`${getColLetter(c)} (Ref Harga)`);
+                  else headers.push(`${getColLetter(c)} (Decoy)`);
+              }
+              
+              let targetArray = [];
+              let refMap = {};
               
               for(let r=1; r<=rows; r++) {
-                  let sku = `SKU-10${r}`;
-                  let row = [sku, `Produk ${r}`];
-                  for(let c=3; c<=totalCols; c++) {
-                      let val = c === targetColIndex ? Math.floor(Math.random() * 500) * 1000 : genDecoy();
-                      row.push(val);
-                      if(sku === targetId && c === targetColIndex) targetValue = val;
-                  }
-                  dataMatrix.push(row);
+                  let s = `SKU-10${r}`;
+                  refMap[s] = Math.floor(Math.random() * 500) * 1000;
               }
-              theory = `Pencarian Dimensi Lebar. Ketik kata FALSE atau angka 0 sebagai parameter terakhir.`;
-              mission = `Tarik Harga dari **Kolom ${getColLetter(targetColIndex)}** untuk ID '${targetId}'. Tabel referensi membentang A1 hingga ${colLetter}${rows}.`;
-              strictFormula = `=VLOOKUP("${targetId}",A1:${colLetter}${rows},${targetColIndex},FALSE)`;
-              explanation = `VLOOKUP menuntut Anda menghitung kolom manual. Jarak antara Kolom A ke Kolom ${getColLetter(targetColIndex)} adalah ${targetColIndex}. Parameter FALSE atau 0 wajib digunakan untuk Exact Match.`;
+
+              for(let r=1; r<=rows; r++) {
+                  let sku = `SKU-10${Math.floor(Math.random() * rows) + 1}`;
+                  let row = [sku];
+                  for(let c=2; c<=totalCols; c++) {
+                      if (c === targetColIndex) {
+                          row.push("?");
+                          targetArray.push(refMap[sku]);
+                      }
+                      else if (c === refTableStartCol) row.push(`SKU-10${r}`);
+                      else if (c === refTableStartCol+1) row.push(refMap[`SKU-10${r}`]);
+                      else row.push(genDecoy());
+                  }
+                  dataMatrix.push({type: 'data', cells: row});
+              }
+              theory = `Mode Mass-Fill: Relational Data Blending menggunakan VLOOKUP.`;
+              let refLtr1 = getColLetter(refTableStartCol);
+              let refLtr2 = getColLetter(refTableStartCol+1);
+              mission = `Tulis VLOOKUP di **Baris 2**. ID pencarian di Kolom A. Tabel Referensi: **${refLtr1}2** hingga **${colLetterRef}${rows+1}**. Kolom indeks adalah 2. Gunakan parameter 0. (Anggap referensi absolut untuk saat ini).`;
+              strictFormula = `=VLOOKUP(A2,${refLtr1}2:${colLetterRef}${rows+1},2,0)`;
+              explanation = `
+                <h4>Bedah Relational Database</h4>
+                <ul>
+                    <li><strong>Mekanisme Inti:</strong> <code>VLOOKUP</code> bekerja seperti klausa <code>LEFT JOIN</code> pada SQL. Ia mencari 'Primary Key' (A2) di kolom paling kiri dari tabel referensi.</li>
+                    <li><strong>Eksekusi Arsitektural:</strong> Parameter <code>0</code> (atau FALSE) adalah perintah brutal. Ia memaksa mesin melakukan pencocokan biner eksak (Exact Match). Tanpa angka 0 ini, Excel menggunakan pencarian proksimitas (Approximate Match) yang akan memuntahkan data hantu jika ID tidak disortir secara alfabetis.</li>
+                    <li><strong>Keterhubungan (Impact):</strong> Keberhasilan rumus ini di Baris 2 memungkinkan jutaan baris log transaksi di kolom A untuk secara instan dikawinkan dengan master data harga di tempat lain.</li>
+                </ul>
+              `;
+              targetValue = targetArray;
           } else {
+              calcMode = "DASHBOARD";
               let critColIndex = 2 + (scale % 4); 
               let valColIndex = critColIndex + 2 + (scale % 5);
               totalCols = Math.max(totalCols, valColIndex);
@@ -402,6 +482,14 @@
                   else headers.push(`${getColLetter(c)} (X)`);
               }
 
+              let searchRow = ["INPUT", regTarget]; 
+              for(let c=3; c<=totalCols; c++) searchRow.push("");
+              dataMatrix.push({type: 'input', cells: searchRow});
+              
+              let outputRow = ["HASIL", "?"]; 
+              for(let c=3; c<=totalCols; c++) outputRow.push("");
+              dataMatrix.push({type: 'divider', cells: outputRow}); 
+
               for(let r=1; r<=rows; r++) {
                   let row = [`KOD-${r}`];
                   let reg = regs[Math.floor(Math.random() * regs.length)];
@@ -411,13 +499,21 @@
                       else if(c === valColIndex) row.push(val);
                       else row.push(genDecoy());
                   }
-                  dataMatrix.push(row);
+                  dataMatrix.push({type: 'data', cells: row});
                   if(reg === regTarget) targetValue += val;
               }
-              theory = `SUMIF Terbelah Jauh.`;
-              mission = `Jumlahkan Nilai di **Kolom ${vLtr}** KHUSUS untuk Region '${regTarget}' di **Kolom ${cLtr}**. Baris 1-${rows}.`;
-              strictFormula = `=SUMIF(${cLtr}1:${cLtr}${rows},"${regTarget}",${vLtr}1:${vLtr}${rows})`;
-              explanation = `Fungsi SUMIF mensyaratkan (Rentang_Kriteria, "Kriteria", Rentang_Penjumlahan). Anda menggunakan ${cLtr} sebagai pemicu dan ${vLtr} sebagai angka hitungan.`;
+
+              theory = `Dashboard Interaktif: Di dunia nyata, Anda tidak mengetik kriteria secara hardcode.`;
+              mission = `Tulis SUMIF di **B3**. Syarat merujuk pada Input Sel **B2**. Rentang kriteria di Kolom ${cLtr}, rentang nilai di Kolom ${vLtr}. Data riil tabel dimulai dari Baris 4 hingga ${rows+3}.`;
+              strictFormula = `=SUMIF(${cLtr}4:${cLtr}${rows+3},B2,${vLtr}4:${vLtr}${rows+3})`;
+              explanation = `
+                <h4>Bedah Conditional Aggregation</h4>
+                <ul>
+                    <li><strong>Mekanisme Inti:</strong> <code>SUMIF</code> menciptakan filter tak kasat mata (Boolean Masking) di memori RAM. Ia memindai ${cLtr}4:${cLtr}${rows+3}, membandingkannya dengan B2. Hanya baris yang lolos filter (TRUE) yang nilainya diizinkan ditarik dari rentang ${vLtr}.</li>
+                    <li><strong>Eksekusi Arsitektural:</strong> Menautkan kriteria ke sel eksternal (<code>B2</code>) alih-alih mengetik "JKT" secara manual (hardcoding) adalah puncak fleksibilitas. Ini memungkinkan pengguna biasa mengganti input dan dasbor akan menghitung ulang otomatis.</li>
+                    <li><strong>Keterhubungan (Impact):</strong> Anda baru saja menciptakan sebuah Interactive KPI Node—pondasi dari seluruh laporan performa finansial tingkat direksi.</li>
+                </ul>
+              `;
           }
       }
       else if (meta.type === "INDEX_MATCH_SUMIFS") { 
@@ -426,37 +522,59 @@
           let mode = scale % 2;
 
           if (mode === 0) { 
+              calcMode = "MASS_FILL";
               let valColIndex = 2 + (scale%5); 
               let keyColIndex = valColIndex + 3 + (scale%8); 
-              totalCols = Math.max(totalCols, keyColIndex, valColIndex);
+              totalCols = Math.max(totalCols, keyColIndex, valColIndex) + 2;
               let vLtr = getColLetter(valColIndex);
               let kLtr = getColLetter(keyColIndex);
-
-              let targetRow = Math.floor(Math.random() * rows) + 1;
-              let targetCode = `SKU-99${targetRow}`;
-              targetValue = Math.floor(Math.random() * 900) * 1000 + 5000;
               
-              headers = ["A (ID)"];
+              let targetColIndex = totalCols; 
+              let tLtr = getColLetter(targetColIndex);
+
+              headers = ["A (Cari ID)"];
               for(let c=2; c<=totalCols; c++) {
-                  if(c===valColIndex) headers.push(`${vLtr} (Hasil)`);
-                  else if(c===keyColIndex) headers.push(`${kLtr} (Kode)`);
+                  if(c===valColIndex) headers.push(`${vLtr} (Ref Hasil)`);
+                  else if(c===keyColIndex) headers.push(`${kLtr} (Ref Kode)`);
+                  else if(c===targetColIndex) headers.push(`${tLtr} (Isi Sini)`);
                   else headers.push(`${getColLetter(c)} (X)`);
               }
 
+              let refMap = {};
               for(let r=1; r<=rows; r++) {
-                  let row = [`ID-${r}`];
+                  let s = `SKU-99${r}`;
+                  refMap[s] = Math.floor(Math.random() * 900) * 1000 + 5000;
+              }
+
+              let targetArray = [];
+              for(let r=1; r<=rows; r++) {
+                  let searchSku = `SKU-99${Math.floor(Math.random() * rows) + 1}`;
+                  let row = [searchSku];
                   for(let c=2; c<=totalCols; c++) {
-                      if (c === valColIndex) row.push(r === targetRow ? targetValue : Math.floor(Math.random() * 900) * 1000);
-                      else if (c === keyColIndex) row.push(r === targetRow ? targetCode : `SKU-99${r}`);
+                      if (c === valColIndex) row.push(refMap[`SKU-99${r}`]);
+                      else if (c === keyColIndex) row.push(`SKU-99${r}`);
+                      else if (c === targetColIndex) {
+                          row.push("?");
+                          targetArray.push(refMap[searchSku]);
+                      }
                       else row.push(genDecoy());
                   }
-                  dataMatrix.push(row);
+                  dataMatrix.push({type: 'data', cells: row});
               }
-              theory = `INDEX MATCH Absolut. VLOOKUP telah lumpuh karena data kunci di kanan.`;
-              mission = `Tarik Hasil (Kolom ${vLtr}) berdasarkan Kode '${targetCode}' yang berada di Kolom ${kLtr}. Baris 1-${rows}.`;
-              strictFormula = `=INDEX(${vLtr}1:${vLtr}${rows},MATCH("${targetCode}",${kLtr}1:${kLtr}${rows},0))`;
-              explanation = `MATCH mencari di baris mana kode berada pada rentang ${kLtr}. INDEX kemudian turun ke baris tersebut pada kolom ${vLtr} dan menarik nilainya secara paksa tanpa mempedulikan posisi kiri/kanan.`;
+              theory = `Mode Propagasi: INDEX MATCH. Pemecahan kelemahan VLOOKUP (Kiri-ke-Kanan).`;
+              mission = `Tulis rumus di **Baris 2** Kolom Target (${tLtr}). Tarik Hasil (${vLtr}) berdasarkan Kode A2 yang dicocokkan ke Kolom ${kLtr}. Rentang referensi 2-${rows+1}.`;
+              strictFormula = `=INDEX(${vLtr}2:${vLtr}${rows+1},MATCH(A2,${kLtr}2:${kLtr}${rows+1},0))`;
+              explanation = `
+                <h4>Bedah Decoupled Lookup Architecture</h4>
+                <ul>
+                    <li><strong>Mekanisme Inti:</strong> Berbeda dengan VLOOKUP yang rapuh, arsitektur ini memisahkan agen pencari (MATCH) dan agen penarik (INDEX). <code>MATCH</code> bertindak sebagai sensor sonar, mengembalikan posisi skalar (angka integer baris ke berapa).</li>
+                    <li><strong>Eksekusi Arsitektural:</strong> <code>INDEX</code> menerima angka integer tersebut dan menyusup langsung ke koordinat itu di dalam vektor hasil <code>${vLtr}</code> tanpa mempedulikan apakah kunci pencarian berada di sebelah kiri atau kanannya.</li>
+                    <li><strong>Keterhubungan (Impact):</strong> Jika struktur basis data perusahaan berubah (kolom disisipkan atau dipindah), VLOOKUP akan hancur seketika. INDEX MATCH tetap utuh (Anti-Fragile).</li>
+                </ul>
+              `;
+              targetValue = targetArray;
           } else { 
+              calcMode = "DASHBOARD";
               let crit1Col = 2 + (scale%3);
               let crit2Col = crit1Col + 2 + (scale%4);
               let valCol = crit2Col + 2 + (scale%5);
@@ -477,6 +595,18 @@
                   else headers.push(`${getColLetter(c)} (X)`);
               }
 
+              let searchRow = ["INPUT 1", rTgt]; 
+              for(let c=3; c<=totalCols; c++) searchRow.push("");
+              dataMatrix.push({type: 'input', cells: searchRow});
+              
+              let searchRow2 = ["INPUT 2", sTgt]; 
+              for(let c=3; c<=totalCols; c++) searchRow2.push("");
+              dataMatrix.push({type: 'input', cells: searchRow2});
+
+              let outputRow = ["HASIL", "?"]; 
+              for(let c=3; c<=totalCols; c++) outputRow.push("");
+              dataMatrix.push({type: 'divider', cells: outputRow});
+
               for(let r=1; r<=rows; r++) {
                   let row = [`KOD-${r}`];
                   let reg = Math.random() > 0.5 ? "Utara" : "Selatan";
@@ -489,13 +619,20 @@
                       else if(c===valCol) row.push(val);
                       else row.push(genDecoy());
                   }
-                  dataMatrix.push(row);
+                  dataMatrix.push({type: 'data', cells: row});
                   if (reg === rTgt && stat === sTgt) targetValue += val;
               }
-              theory = `SUMIFS Matriks Acak.`;
-              mission = `Jumlahkan Nilai (Kolom ${vLtr}) JIKA Reg '${rTgt}' (Kolom ${c1Ltr}) DAN Stat '${sTgt}' (Kolom ${c2Ltr}). Baris 1-${rows}.`;
-              strictFormula = `=SUMIFS(${vLtr}1:${vLtr}${rows},${c1Ltr}1:${c1Ltr}${rows},"${rTgt}",${c2Ltr}1:${c2Ltr}${rows},"${sTgt}")`;
-              explanation = `SUMIFS mensyaratkan rentang angka yang dihitung (${vLtr}) diletakkan di parameter paling awal. Setelah itu, barulah Anda merangkai syarat logika secara berpasangan.`;
+              theory = `Dashboard Interaktif: Filter Ganda (Multi-Dimensional Aggregation).`;
+              mission = `Tulis SUMIFS di **B4**. Referensi dinamis ke **B2** (Region) dan **B3** (Status). Data dimulai Baris 5 hingga ${rows+4}.`;
+              strictFormula = `=SUMIFS(${vLtr}5:${vLtr}${rows+4},${c1Ltr}5:${c1Ltr}${rows+4},B2,${c2Ltr}5:${c2Ltr}${rows+4},B3)`;
+              explanation = `
+                <h4>Bedah Multi-Dimensional Intersect</h4>
+                <ul>
+                    <li><strong>Mekanisme Inti:</strong> <code>SUMIFS</code> menumpuk beberapa saringan virtual. Ini adalah eksekusi Logika AND (Irisan Konjungsi). Hanya data yang menembus filter B2 dan filter B3 sekaligus yang angkanya akan disedot dari vektor ${vLtr}.</li>
+                    <li><strong>Eksekusi Arsitektural:</strong> Sintaks menempatkan rentang hasil (Value Array) di bagian absolut terdepan. Sisanya adalah pasangan tak terbatas (Kriteria_Array1, Kunci1, Kriteria_Array2, Kunci2).</li>
+                    <li><strong>Keterhubungan (Impact):</strong> Pengendalian parameter secara eksternal (B2 dan B3) memungkinkan direktur men-tweak Dasbor dan melihat re-kalkulasi jutaan data tanpa resiko menghancurkan hardcode rumus.</li>
+                </ul>
+              `;
           }
       }
       else if (meta.type === "GOD_TIER_NESTED") {
@@ -504,6 +641,7 @@
           let mode = scale % 3;
 
           if (mode === 0) {
+              calcMode = "DASHBOARD";
               let targetRowId = `PROD-${Math.floor(Math.random() * rows) + 1}`;
               let targetMonth = ["Jan", "Feb", "Mar", "Apr", "Mei"][scale % 5];
               targetValue = Math.floor(Math.random() * 500) * 1000 + 1500;
@@ -512,67 +650,113 @@
               headers = ["A (Produk)", "B (Jan)", "C (Feb)", "D (Mar)", "E (Apr)", "F (Mei)"];
               for(let c=7; c<=totalCols; c++) headers.push(`${getColLetter(c)} (X)`);
 
-              let row1 = ["HEADER"];
-              for(let c=2; c<=6; c++) row1.push(["Jan", "Feb", "Mar", "Apr", "Mei"][c-2]);
-              for(let c=7; c<=totalCols; c++) row1.push("Bulan_X");
-              dataMatrix.push(row1); 
+              let searchRow1 = ["CARI_PRODUK", targetRowId]; 
+              for(let c=3; c<=totalCols; c++) searchRow1.push("");
+              dataMatrix.push({type: 'input', cells: searchRow1}); // B2
+              
+              let searchRow2 = ["CARI_BULAN", targetMonth]; 
+              for(let c=3; c<=totalCols; c++) searchRow2.push("");
+              dataMatrix.push({type: 'input', cells: searchRow2}); // B3
+
+              let outputRow = ["HASIL", "?"]; 
+              for(let c=3; c<=totalCols; c++) outputRow.push("");
+              dataMatrix.push({type: 'divider', cells: outputRow}); // B4
+
+              let rowHeaderData = ["HEADER"];
+              for(let c=2; c<=6; c++) rowHeaderData.push(["Jan", "Feb", "Mar", "Apr", "Mei"][c-2]);
+              for(let c=7; c<=totalCols; c++) rowHeaderData.push("Bulan_X");
+              dataMatrix.push({type: 'data', cells: rowHeaderData}); // B5
 
               for(let r=2; r<=rows; r++) { 
                   let prodId = `PROD-${r-1}`;
                   let row = [prodId];
                   for(let c=2; c<=totalCols; c++) {
-                      let isTargetCell = (prodId === targetRowId && row1[c-1] === targetMonth);
+                      let isTargetCell = (prodId === targetRowId && rowHeaderData[c-1] === targetMonth);
                       let val = isTargetCell ? targetValue : Math.floor(Math.random() * 900) * 1000;
                       row.push(val);
                   }
-                  dataMatrix.push(row);
+                  dataMatrix.push({type: 'data', cells: row});
               }
-              theory = `2D INDEX MATCH. Dua fungsi MATCH di dalam satu INDEX.`;
-              mission = `Tarik Harga untuk Produk '${targetRowId}' pada bulan '${targetMonth}'. Matriks data: B2:${colLetter}${rows}. Baris produk di A2:A${rows}. Kolom bulan di B1:${colLetter}1.`;
-              strictFormula = `=INDEX(B2:${colLetter}${rows},MATCH("${targetRowId}",A2:A${rows},0),MATCH("${targetMonth}",B1:${colLetter}1,0))`;
-              explanation = `Teknik pemetaan silang. MATCH pertama mencari secara vertikal di Kolom A. MATCH kedua mencari secara horizontal di Baris 1. INDEX memadukan keduanya bak koordinat X dan Y pada peta.`;
+              theory = `Dashboard Arsitek: 2D INDEX MATCH Interaktif.`;
+              mission = `Tulis di **B4**. Tarik Harga berdasar Input B2 (Produk) dan Input B3 (Bulan). Data angka: B6:${colLetter}${rows+4}. Header produk: A6:A${rows+4}. Header bulan: B5:${colLetter}5.`;
+              strictFormula = `=INDEX(B6:${colLetter}${rows+4},MATCH(B2,A6:A${rows+4},0),MATCH(B3,B5:${colLetter}5,0))`;
+              explanation = `
+                <h4>Bedah Biaxial Cartesian Mapping (2D)</h4>
+                <ul>
+                    <li><strong>Mekanisme Inti:</strong> Rumus ini mengubah matriks data datar menjadi sistem koordinat kartesius sejati. <code>MATCH</code> pertama berburu menyusuri sumbu Y (Ordinat Baris). <code>MATCH</code> kedua berburu menyusuri sumbu X (Absis Kolom).</li>
+                    <li><strong>Eksekusi Arsitektural:</strong> Vektor hasil pencarian (integer) dilemparkan ke dalam perut <code>INDEX</code>. INDEX bertindak sebagai inti prosesor, memadukan (Y, X) untuk mengekstrak persimpangan sel tunggal dari kanvas raksasa <code>B6:${colLetter}${rows+4}</code>.</li>
+                    <li><strong>Keterhubungan (Impact):</strong> Ini adalah arsitektur tulang punggung dari semua PNL (Profit & Loss) Statement yang dinamis di firma akuntansi global. Tanpa ini, analisis data dua dimensi adalah mustahil.</li>
+                </ul>
+              `;
           } else if (mode === 1) {
+              calcMode = "MASS_FILL";
               let kpiThresh = 90; let absThresh = 95;
-              headers = ["A (Nama)", "B (KPI)", "C (Absen)", "D (Gaji Base)", "E (Decoy)"];
-              for(let c=6; c<=totalCols; c++) headers.push(`${getColLetter(c)}`);
+              headers = ["A (Nama)", "B (KPI)", "C (Absen)", "D (Gaji Base)", "E (Isi Bonus)"];
+              for(let c=6; c<=totalCols; c++) headers.push(`${getColLetter(c)} (Decoy)`);
 
-              let kpi = Math.floor(Math.random() * 20) + 80;
-              let absen = Math.floor(Math.random() * 10) + 90;
-              targetValue = (kpi >= kpiThresh && absen >= absThresh) ? 2000 * 1.5 : 0;
-
+              let targetArray = [];
               for(let r=1; r<=rows; r++) {
                   let row = [`Staff ${r}`];
-                  if(r===1) row.push(kpi, absen, 2000);
-                  else row.push(Math.floor(Math.random() * 100), Math.floor(Math.random() * 100), 2000);
-                  for(let c=5; c<=totalCols; c++) row.push(genDecoy());
-                  dataMatrix.push(row);
+                  let kpi = Math.floor(Math.random() * 20) + 80;
+                  let absen = Math.floor(Math.random() * 10) + 90;
+                  let bonus = (kpi >= kpiThresh && absen >= absThresh) ? 2000 * 1.5 : 0;
+                  
+                  row.push(kpi, absen, 2000, "?");
+                  targetArray.push(bonus);
+
+                  for(let c=6; c<=totalCols; c++) row.push(genDecoy());
+                  dataMatrix.push({type: 'data', cells: row});
               }
-              theory = `NESTED IF(AND). Gerbang logika kembar.`;
-              mission = `Evaluasi Baris 1: JIKA KPI (Sel B1) >= ${kpiThresh} DAN Absen (Sel C1) >= ${absThresh}, MAKA kalikan Gaji Base (Sel D1) dengan 1.5. Jika salah satu gagal, beri nilai 0.`;
-              strictFormula = `=IF(AND(B1>=${kpiThresh},C1>=${absThresh}),D1*1.5,0)`;
-              explanation = `Fungsi AND() memaksa kedua kondisi harus TRUE agar IF menjalankan instruksi 'D1*1.5'. Jika satu syarat gagal, sistem melompat ke FALSE (0).`;
+              targetValue = targetArray;
+
+              theory = `Mode Mass-Fill: NESTED IF(AND). Gerbang logika kembar bersarang.`;
+              mission = `Tulis di **Baris 2** (Kolom E). JIKA KPI (B2) >= ${kpiThresh} DAN Absen (C2) >= ${absThresh}, MAKA kalikan Gaji Base (D2) dengan 1.5. Jika tidak, 0.`;
+              strictFormula = `=IF(AND(B2>=${kpiThresh},C2>=${absThresh}),D2*1.5,0)`;
+              explanation = `
+                <h4>Bedah Nested Boolean Conjunction</h4>
+                <ul>
+                    <li><strong>Mekanisme Inti:</strong> Sarang <code>AND()</code> memaksa arsitektur sirkuit seri. Kedua node (KPI dan Absen) wajib mengeluarkan impuls komputasi TRUE (1 x 1 = 1).</li>
+                    <li><strong>Eksekusi Arsitektural:</strong> Jika salah satu saja node gagal dan melempar FALSE (0), seluruh gerbang AND runtuh ke nilai 0. Fungsi utama <code>IF</code> di kulit terluar langsung mendepak kalkulasi kalkulus (D2*1.5) dan melompat ke blok kegagalan (0).</li>
+                    <li><strong>Keterhubungan (Impact):</strong> Logika ini memastikan tidak ada kebocoran dana (Zero-Trust Policy) dalam perhitungan payroll massal tingkat institusi.</li>
+                </ul>
+              `;
           } else {
+              calcMode = "MASS_FILL";
               let targetId = `ID-999`; 
               let colLetter = getColLetter(totalCols);
 
-              headers = ["A (ID)", "B (Harga)", "C (Decoy)"];
-              for(let c=4; c<=totalCols; c++) headers.push(`${getColLetter(c)}`);
+              headers = ["A (ID List)", "B (Isi Harga Valid)", "C (Ref ID)", "D (Ref Harga)"];
+              for(let c=5; c<=totalCols; c++) headers.push(`${getColLetter(c)} (X)`);
 
+              let targetArray = [];
               for(let r=1; r<=rows; r++) {
-                  let row = [`ID-${r}`, Math.floor(Math.random() * 500) * 1000];
-                  for(let c=3; c<=totalCols; c++) row.push(genDecoy());
-                  dataMatrix.push(row);
-              }
+                  let isGhoib = Math.random() > 0.7;
+                  let idList = isGhoib ? "ID-999" : `ID-${r}`;
+                  let hrgValid = isGhoib ? "REJECT" : r * 1000 * 1.11;
+                  targetArray.push(hrgValid);
 
-              targetValue = "REJECT";
-              theory = `Matriks Bertameng. IFERROR dalam satu baris.`;
-              mission = `Gunakan VLOOKUP untuk mencari Harga (Kolom B) dari ID '${targetId}'. Kalikan hasil tersebut dengan 1.11 (Pajak). Karena ID fiktif, bungkus dengan IFERROR agar mencetak "REJECT".`;
-              strictFormula = `=IFERROR(VLOOKUP("${targetId}",A1:${colLetter}${rows},2,0)*1.11,"REJECT")`;
-              explanation = `Excel menghitung VLOOKUP*1.11 terlebih dahulu. Jika pencarian gagal, VLOOKUP memuntahkan #N/A. IFERROR mencegat crash tersebut dan menggantinya dengan 'REJECT'.`;
+                  let row = [idList, "?", `ID-${r}`, r * 1000];
+                  for(let c=5; c<=totalCols; c++) row.push(genDecoy());
+                  dataMatrix.push({type: 'data', cells: row});
+              }
+              targetValue = targetArray;
+
+              theory = `Mode Mass-Fill: IFERROR Tameng Eksekusi (Anti-Fragile).`;
+              mission = `Tulis di **Baris 2**. VLOOKUP sel A2 ke Tabel Referensi (C2:D${rows+1}), indeks 2. Kalikan dengan 1.11. Jika VLOOKUP gagal, cetak "REJECT".`;
+              strictFormula = `=IFERROR(VLOOKUP(A2,C2:D${rows+1},2,0)*1.11,"REJECT")`;
+              explanation = `
+                <h4>Bedah Anti-Fragile Exception Handling</h4>
+                <ul>
+                    <li><strong>Mekanisme Inti:</strong> <code>VLOOKUP</code> berjalan di layer operasi terdalam (Layer 1). Jika ia menabrak Null-Pointer / Data Kosong, ia merusak persamaan matematika dan melempar virus #N/A ke luar memori.</li>
+                    <li><strong>Eksekusi Arsitektural:</strong> Virus #N/A (Error) ini ditangkap seketika oleh cangkang luar (Layer 0) bernama <code>IFERROR</code>. IFERROR mencegah *Cascade Crash* (Kehancuran Berantai) pada sisa ribuan baris, dan menukarnya secara anggun dengan String peringatan "REJECT".</li>
+                    <li><strong>Keterhubungan (Impact):</strong> Tanpa tameng IFERROR, satu sel cacat (#N/A) akan menular dan melumpuhkan laporan kalkulasi total (SUM) pada Dashboard utama di layar Direksi.</li>
+                </ul>
+              `;
           }
       }
       else { 
           // TIER 6: TITAN COMPLEX
+          calcMode = "DASHBOARD";
           rows = Math.min(30 + Math.floor(scale / 10), 300); 
           totalCols = Math.min(10 + Math.floor(scale / 25), 26);
           let colLtr = getColLetter(totalCols);
@@ -580,8 +764,20 @@
           let targetEmp = `EMP-0${Math.floor(Math.random()*9)+1}`; 
           let deptMatch = "IT"; 
           
-          headers = ["A (ID)", "B (Gaji)", "C (Dept)", "D (Tunjangan)", "E (X)"];
+          headers = ["A (ID)", "B (Gaji Pokok)", "C (Dept)", "D (Tunjangan)", "E (X)"];
           for(let c=6; c<=totalCols; c++) headers.push(`${getColLetter(c)}`);
+
+          let inputRow1 = ["EMP_SEARCH", targetEmp]; 
+          for(let c=3; c<=totalCols; c++) inputRow1.push("");
+          dataMatrix.push({type: 'input', cells: inputRow1}); 
+          
+          let inputRow2 = ["DEPT_SEARCH", deptMatch]; 
+          for(let c=3; c<=totalCols; c++) inputRow2.push("");
+          dataMatrix.push({type: 'input', cells: inputRow2}); 
+
+          let outputRow = ["HASIL_FINAL", "?"]; 
+          for(let c=3; c<=totalCols; c++) outputRow.push("");
+          dataMatrix.push({type: 'divider', cells: outputRow}); 
 
           let totalTunjanganIT = 0;
           let empGaji = 0;
@@ -596,7 +792,7 @@
 
               let row = [empId, gaji, dept, tunjangan];
               for(let c=5; c<=totalCols; c++) row.push(genDecoy());
-              dataMatrix.push(row);
+              dataMatrix.push({type: 'data', cells: row});
 
               if (isTarget) { empGaji = gaji; isEmpExist = true; }
               if (dept === deptMatch) totalTunjanganIT += tunjangan;
@@ -605,38 +801,42 @@
           if(isEmpExist) targetValue = empGaji * totalTunjanganIT;
           else targetValue = 0;
 
-          theory = `TITAN CLASS: Financial Modeling. Kombinasi 3 logika korporat dalam satu baris.`;
-          mission = `Cari Gaji (Kolom B) karyawan '${targetEmp}' dengan VLOOKUP. KALIKAN hasil tersebut dengan Total Tunjangan (Kolom D) khusus Dept '${deptMatch}' (Kolom C) menggunakan SUMIF. JIKA VLOOKUP gagal (karyawan resign), bungkus semuanya dengan IFERROR untuk memuntahkan angka 0. Tabel A1:${colLtr}${rows}.`;
-          strictFormula = `=IFERROR(VLOOKUP("${targetEmp}",A1:${colLtr}${rows},2,FALSE)*SUMIF(C1:C${rows},"${deptMatch}",D1:D${rows}),0)`;
-          explanation = `VLOOKUP mencari komponen statis (Gaji), SUMIF merangkum komponen dinamis agregat (Total Tunjangan IT). Mereka dikalikan. Jika VLOOKUP tidak menemukan karyawan tersebut, rantai hitungan akan runtuh dan dicegat langsung oleh IFERROR yang mengembalikannya menjadi 0.`;
+          theory = `TITAN CLASS: Financial Dashboard Modeling. Menyatukan Konstanta, Agregat, dan Tameng.`;
+          mission = `Tulis di **B4**. Cari Gaji Karyawan (Input B2) dengan VLOOKUP. KALIKAN dengan Total Tunjangan (Kolom D) khusus untuk Dept (Input B3) menggunakan SUMIF. JIKA gagal, bungkus dengan IFERROR untuk nilai 0. Tabel Data: A5:${colLtr}${rows+4}.`;
+          strictFormula = `=IFERROR(VLOOKUP(B2,A5:${colLtr}${rows+4},2,0)*SUMIF(C5:C${rows+4},B3,D5:D${rows+4}),0)`;
+          explanation = `
+            <h4>Bedah Arsitektur Hybrid Dimensional</h4>
+            <ul>
+                <li><strong>Mekanisme Inti (Layer 1 - Konstanta):</strong> <code>VLOOKUP</code> diluncurkan untuk memetakan referensi tunggal B2 dan mengekstrak entitas statis (Konstanta Skalar) berupa Gaji Pokok.</li>
+                <li><strong>Mekanisme Inti (Layer 2 - Agregat):</strong> <code>SUMIF</code> beroperasi independen untuk membedah lautan array Departemen, menjaring kecocokan (B3), lalu menggumpalkan Nilai Vektor menjadi satu Agregat Finansial utuh.</li>
+                <li><strong>Eksekusi Arsitektural (Layer 0 - Sintesis & Tameng):</strong> Operator Bintang (<code>*</code>) memadukan Konstanta dan Agregat di dalam RAM. Jika Konstanta gagal dipanggil (karyawan resign/tidak eksis), selubung pelindung luar <code>IFERROR</code> secara sepihak membatalkan kerusakan mesin dan menginjeksi <i>absolute zero</i> (0) ke Dasbor Eksekutif. Inilah Puncak Ilmu Rekayasa Excel.</li>
+            </ul>
+          `;
       }
 
       if(typeof targetValue === 'number') targetValue = Number(targetValue.toFixed(4));
 
       return {
           ...meta,
-          theory, mission, strictFormula, targetValue, explanation,
+          calcMode, theory, mission, strictFormula, targetValue, explanation,
           columns: headers, data: dataMatrix
       };
     }
 
     // ==========================================
-    // 3. UX HIGHLIGHTING ENGINE (Visual Feedback)
+    // 3. UI LOGIC & HIGHLIGHTING 
     // ==========================================
     function toggleTheme() {
       const body = document.documentElement;
       body.setAttribute("data-theme", body.getAttribute("data-theme") === "light" ? "dark" : "light");
     }
 
-    // Fungsi konversi huruf ke angka indeks DOM
     function applyHighlighting() {
-        // Hapus highlight sebelumnya
         document.querySelectorAll('.highlight-cell').forEach(td => td.classList.remove('highlight-cell'));
 
         const formulaRaw = document.getElementById('formulaInput').value.toUpperCase();
         if(!formulaRaw.startsWith('=')) return;
 
-        // Regex canggih pencari koordinat A1 atau A1:B5
         const regex = /([A-Z]+)(\d+)(?::([A-Z]+)(\d+))?/g;
         let match;
         const tableRows = document.querySelectorAll('#sandboxBody tr');
@@ -652,33 +852,25 @@
             let minRow = Math.min(startRow, endRow);
             let maxRow = Math.max(startRow, endRow);
 
-            // Eksekusi Injeksi CSS ke tabel DOM
             for(let r = minRow; r <= maxRow; r++) {
-                if(r - 1 >= 0 && r - 1 < tableRows.length) {
-                    const cells = tableRows[r - 1].querySelectorAll('td');
+                let domRowIndex = r - 2; 
+                if(domRowIndex >= 0 && domRowIndex < tableRows.length) {
+                    const cells = tableRows[domRowIndex].querySelectorAll('td');
                     for(let c = minCol; c <= maxCol; c++) {
-                        // Di DOM, index c=1 adalah Kolom A (karena c=0 adalah nomor baris)
-                        if(cells[c]) {
-                            cells[c].classList.add('highlight-cell');
-                        }
+                        if(cells[c]) cells[c].classList.add('highlight-cell');
                     }
                 }
             }
         }
     }
 
-    // ==========================================
-    // 4. UI LOGIC (PENCARIAN & NAVIGASI)
-    // ==========================================
     function handleTyping(e) {
       const query = e.target.value.trim().toLowerCase();
       renderTOC(query);
     }
 
     function handleEnterKey(e) {
-        if (e.key === 'Enter') {
-            executeExactSearch();
-        }
+        if (e.key === 'Enter') executeExactSearch();
     }
 
     function executeExactSearch() {
@@ -733,13 +925,6 @@
         div.innerHTML = `<span class="level-badge ${item.badgeClass}">LVL ${item.globalLevel} | ${item.levelStr}</span><span>${item.title}</span>`;
         list.appendChild(div);
       });
-
-      if(filtered.length > renderLimit.length) {
-        let note = document.createElement("div");
-        note.style = "padding: 1rem; color: var(--text-muted); font-size: 0.85rem; text-align: center; font-weight: 600;";
-        note.innerText = `+ ${filtered.length - renderLimit.length} Level selanjutnya tersedia.`;
-        list.appendChild(note);
-      }
     }
 
     let activeCompiledLesson = null;
@@ -761,13 +946,25 @@
         <p><strong>Misi Anda:</strong><br>${lesson.mission}</p>
       `;
 
-      let tableHeader = `<th class="row-num">#</th>`;
+      let tableHeader = `<th class="row-num">1</th>`;
       lesson.columns.forEach(col => { tableHeader += `<th>${col}</th>`; });
 
       let tableBody = ``;
-      lesson.data.forEach((row, rowIndex) => {
-        tableBody += `<tr><td class="row-num">${rowIndex + 1}</td>`;
-        row.forEach(cell => { tableBody += `<td contenteditable="true">${cell}</td>`; });
+      lesson.data.forEach((rowObj, rowIndex) => {
+        let trClass = "";
+        if (rowObj.type === "input") trClass = "dashboard-input";
+        if (rowObj.type === "divider") trClass = "dashboard-divider";
+
+        tableBody += `<tr class="${trClass}"><td class="row-num">${rowIndex + 2}</td>`;
+        rowObj.cells.forEach((cell, cellIndex) => { 
+            if (rowObj.type === "input" && cellIndex === 0) {
+                 tableBody += `<td class="dashboard-label">${cell}</td>`;
+            } else if (cell === "?") {
+               tableBody += `<td class="empty-target">?</td>`;
+            } else {
+               tableBody += `<td contenteditable="${rowObj.type === 'data' ? 'true' : 'false'}">${cell}</td>`; 
+            }
+        });
         tableBody += `</tr>`;
       });
 
@@ -782,7 +979,7 @@
           <textarea id="formulaInput" class="auto-expand" rows="1" placeholder="Ketik rumus mutlak di sini..."></textarea>
           <div class="button-group">
             <button class="btn-test" onclick="runTest()">Uji Eksekusi</button>
-            <button class="btn-giveup" onclick="giveUp()">Solusi</button>
+            <button class="btn-giveup" onclick="giveUp()">Bedah Logika (Solusi)</button>
           </div>
           <div id="feedbackBox" class="feedback">
              <strong id="feedTitle"></strong>
@@ -796,7 +993,7 @@
       textarea.addEventListener("input", function() {
         this.style.height = "auto";
         this.style.height = (this.scrollHeight) + "px";
-        applyHighlighting(); // <-- MEMICU VISUAL HIGHLIGHTING SECARA REAL-TIME
+        applyHighlighting(); 
       });
 
       gsap.fromTo("#theoryPage, #practicePage", { opacity: 0, y: 15 }, { opacity: 1, y: 0, duration: 0.4, stagger: 0.1 });
@@ -818,7 +1015,7 @@
     }
 
     // ==========================================
-    // 5. MESIN EVALUASI ABSOLUT & EDUKASI
+    // 4. MESIN EVALUASI (ARCHITECTURAL ANALYSIS FEEDBACK)
     // ==========================================
     function saveProgress(level) {
         if (level > highestAchievedLevel) {
@@ -839,14 +1036,18 @@
       input.value = lesson.strictFormula;
       input.style.height = "auto";
       input.style.height = (input.scrollHeight) + "px";
-      applyHighlighting(); // Highlight jawaban solusi
+      applyHighlighting();
 
-      showFeedback(feedback, title, msg, 'info', "ANALISIS SOLUSI", `Sintaks Produksi: <code>${lesson.strictFormula}</code> <div class="explanation-block"><strong>Breakdown Logika:</strong><br>${lesson.explanation}</div>`);
+      const oldRow = document.getElementById('matrixResultRow');
+      if (oldRow) oldRow.remove();
+
+      showFeedback(feedback, title, msg, 'info', "ANALISIS POST-MORTEM (SOLUSI)", `Sintaks Produksi: <code>${lesson.strictFormula}</code> <div class="explanation-block">${lesson.explanation}</div>`);
 
       if (currentIndex < curriculumMeta.length - 1) {
         btnNext.style.display = "block";
         gsap.fromTo(btnNext, {opacity: 0, y: 10}, {opacity: 1, y: 0, duration: 0.3});
       }
+      setTimeout(() => { window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }); }, 300);
     }
 
     function runTest() {
@@ -857,6 +1058,9 @@
       const msg = document.getElementById("feedMsg");
       const btnNext = document.getElementById("btnNext");
 
+      const oldRow = document.getElementById('matrixResultRow');
+      if (oldRow) oldRow.remove();
+
       if (!userFormulaRaw.trim()) return;
       
       let userFormula = userFormulaRaw.replace(/[\r\n\t]/g, '').replace(/[“”〝〞〟＂«»„‟]/g, '"').replace(/['‘’‛]{2}/g, '"').replace(/;/g, ',').replace(/[\u200B-\u200D\uFEFF\u00A0]/g, '').trim();
@@ -866,61 +1070,97 @@
       }
 
       let formulaForEngine = userFormula.replace(/FALSE/gi, '0');
-
       const cleanUserFormula = userFormula.toUpperCase().replace(/\s/g, '').replace(/FALSE/g, '0');
       const cleanStrictFormula = lesson.strictFormula.toUpperCase().replace(/\s/g, '').replace(/FALSE/g, '0');
-      let activeSheetId;
+      
+      let isFormulaStrict = cleanUserFormula === cleanStrictFormula;
 
-      try {
-        const sheetName = engine.addSheet('RuntimeSheet');
-        activeSheetId = engine.getSheetId(sheetName);
-        engine.setSheetContent(activeSheetId, getTableData());
+      if (!isFormulaStrict) {
+          showFeedback(feedback, title, msg, 'error', "LOGIKA DITOLAK", `Struktur sintaks Anda menyimpang dari standar korporat untuk matriks data ini. Wajib menggunakan kerangka: <code>${lesson.strictFormula}</code>`);
+          return;
+      }
 
-        const evalCell = { sheet: activeSheetId, col: 100, row: 1000 };
-        engine.setCellContents(evalCell, [[formulaForEngine]]);
-
-        const result = engine.getCellValue(evalCell);
-        
-        if (result && typeof result === 'object' && result.toString().startsWith('#')) {
-            throw new Error(result.toString());
-        }
-
-        let isResultCorrect;
-        if(typeof result === 'number' && typeof lesson.targetValue === 'number') {
-            let evalNum = Number(result.toFixed(4));
-            let targetNum = Number(Number(lesson.targetValue).toFixed(4));
-            isResultCorrect = (evalNum === targetNum);
-        } else {
-            isResultCorrect = (result.toString() === lesson.targetValue.toString());
-        }
-        
-        let isFormulaStrict = cleanUserFormula === cleanStrictFormula;
-
-        if (isResultCorrect && isFormulaStrict) {
-          showFeedback(feedback, title, msg, 'success', "EKSEKUSI SEMPURNA", `Output perhitungan <strong>${result}</strong> presisi.<div class="explanation-block"><strong>Mengapa rumus ini valid?</strong><br>${lesson.explanation}</div>`);
+      if (lesson.calcMode === "MASS_FILL") {
           
+          const tableRows = document.querySelectorAll('#sandboxBody tr');
+          const targetArray = lesson.targetValue;
+          
+          let emptyColIndex = -1;
+          for(let i=0; i<tableRows.length; i++) {
+              const cells = tableRows[i].querySelectorAll('td');
+              for(let j=0; j<cells.length; j++) {
+                  if(cells[j].innerText === "?") {
+                      emptyColIndex = j; break;
+                  }
+              }
+              if (emptyColIndex !== -1) break;
+          }
+
+          if (emptyColIndex !== -1) {
+              let targetIdx = 0;
+              tableRows.forEach((tr, idx) => {
+                  const cell = tr.querySelectorAll('td')[emptyColIndex];
+                  if(cell && cell.innerText === "?") {
+                      cell.classList.remove('empty-target');
+                      cell.classList.add('filled-target');
+                      cell.innerText = typeof targetArray[targetIdx] === 'number' ? targetArray[targetIdx].toLocaleString('id-ID') : targetArray[targetIdx];
+                      gsap.fromTo(cell, {opacity: 0, y: -10}, {opacity: 1, y: 0, duration: 0.4, delay: targetIdx * 0.05});
+                      targetIdx++;
+                  }
+              });
+          }
+
+          showFeedback(feedback, title, msg, 'success', "PROPAGASI MASIF BERHASIL", `Sistem telah menarik rumus Anda ke bawah (Drag-Down) untuk mengeksekusi seluruh kolom matriks secara asinkron.<div class="explanation-block">${lesson.explanation}</div>`);
           saveProgress(lesson.globalLevel); 
-          
           if (currentIndex < curriculumMeta.length - 1) {
             btnNext.style.display = "block";
             gsap.fromTo(btnNext, {opacity: 0, y: 10}, {opacity: 1, y: 0, duration: 0.3});
           }
-        } else if (isResultCorrect && !isFormulaStrict) {
-          showFeedback(feedback, title, msg, 'error', "TARGET TERCAPAI, LOGIKA DITOLAK", `Anda mendapat output yang benar, namun struktur sintaks Anda dipertanyakan secara profesional. Wajib: <code>${lesson.strictFormula}</code><div class="explanation-block"><strong>Pemahaman Standar Korporat:</strong><br>${lesson.explanation}</div>`);
-        } else {
-          showFeedback(feedback, title, msg, 'error', "KEGAGALAN ANALISIS", `Output Mesin: ${result}. Target Misi: ${lesson.targetValue}.<div class="explanation-block"><strong>Petunjuk Audit Logika:</strong><br>Periksa kembali rentang matriks Anda yang disorot biru/emas di tabel. ${lesson.theory}</div>`);
-        }
-      } catch (err) {
-        let eMsg = err.message;
-        if (eMsg.includes('#NAME?')) eMsg = "<strong>SYNTAX ERROR (#NAME?):</strong> Anda salah mengeja nama fungsi (typo) dalam sarang fungsi Anda.";
-        else if (eMsg.includes('#N/A')) eMsg = "Target data tidak ditemukan dalam matriks Array. Ingat penggunaan fungsi tameng IFERROR jika ini level jebakan.";
-        else if (eMsg.includes('#VALUE!')) eMsg = "Tipe data berbenturan (misal membagi sel teks huruf dengan angka kalkulasi).";
-        else if (eMsg.includes('#REF!')) eMsg = "Referensi pemblokiran sel Anda keluar dari batas tabel riil.";
-        else if (eMsg.includes('Parse error')) eMsg = "Pecah kompilasi. Anda melupakan kurung tutup atau terjadi kelebihan koma penyekat.";
-        
-        showFeedback(feedback, title, msg, 'error', "INTERUPSI MESIN EXCEL", eMsg);
-      } finally {
-        if (activeSheetId !== undefined) engine.removeSheet(activeSheetId);
+          setTimeout(() => { window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }); }, 500);
+
+      } else {
+          const tbody = document.getElementById("sandboxBody");
+          const totalCols = lesson.columns.length + 1; 
+          const result = lesson.targetValue;
+          
+          const tr = document.createElement("tr");
+          tr.id = "matrixResultRow";
+          tr.className = "matrix-result-row";
+          tr.innerHTML = `
+            <td colspan="${totalCols}" class="matrix-result-label">
+                Laporan Dasbor Final: <br>
+                <span class="matrix-result-value" id="matrixResultValue">0</span>
+            </td>
+          `;
+          tbody.appendChild(tr);
+
+          setTimeout(() => { tr.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 100);
+
+          if (typeof result === 'number') {
+              let targetObj = { val: 0 };
+              gsap.to(targetObj, {
+                  val: result,
+                  duration: 1.5,
+                  ease: "power3.out",
+                  onUpdate: function() {
+                      document.getElementById("matrixResultValue").innerText = Math.round(this.targets()[0].val).toLocaleString('id-ID');
+                  },
+                  onComplete: function() {
+                      document.getElementById("matrixResultValue").innerText = result.toLocaleString('id-ID');
+                  }
+              });
+          } else {
+              document.getElementById("matrixResultValue").innerText = result;
+              gsap.fromTo("#matrixResultValue", {scale: 0.2, opacity: 0}, {scale: 1, opacity: 1, duration: 0.8, ease: "back.out(1.7)"});
+          }
+
+          showFeedback(feedback, title, msg, 'success', "VALIDASI ARSITEKTUR SEMPURNA", `Komputasi agregat berhasil mengunci nilai target.<div class="explanation-block">${lesson.explanation}</div>`);
+          saveProgress(lesson.globalLevel); 
+          if (currentIndex < curriculumMeta.length - 1) {
+            btnNext.style.display = "block";
+            gsap.fromTo(btnNext, {opacity: 0, y: 10}, {opacity: 1, y: 0, duration: 0.3});
+          }
+          setTimeout(() => { window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }); }, 1600);
       }
     }
 
@@ -929,6 +1169,7 @@
         currentIndex++;
         document.getElementById("formulaInput").value = '';
         document.getElementById("formulaInput").style.height = 'auto';
+        applyHighlighting();
         loadLesson();
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }
